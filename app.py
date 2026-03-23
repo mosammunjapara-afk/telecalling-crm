@@ -966,9 +966,15 @@ def notif_count():
     return jsonify({"count": n})
 
 if __name__ == "__main__":
-    print("\n" + "="*55)
-    print("  🚀 TELECALLER CRM — http://localhost:5000")
-    print("  📋 Lead Form   — http://localhost:5000/form")
-    print("  🔐 Admin Login — admin / admin123")
-    print("="*55 + "\n")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Render environmental variable 'PORT' provide karta hai (default 10000)
+    port = int(os.environ.get("PORT", 10000))
+    # host='0.0.0.0' hona zaroori hai taaki external network se access ho sake
+    app.run(host='0.0.0.0', port=port)
+
+# if __name__ == "__main__":
+#     print("\n" + "="*55)
+#     print("  🚀 TELECALLER CRM — http://localhost:5000")
+#     print("  📋 Lead Form   — http://localhost:5000/form")
+#     print("  🔐 Admin Login — admin / admin123")
+#     print("="*55 + "\n")
+#     app.run(debug=True, host="0.0.0.0", port=5000)
