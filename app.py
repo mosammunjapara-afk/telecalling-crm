@@ -1,18 +1,9 @@
-# from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, Response, send_file
-# import sqlite3, os, csv, io, hashlib
-# from datetime import datetime, date
-# from functools import wraps
-
-# app = Flask(__name__)
-
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, Response, send_file
-import sqlite3, os, csv, io, hashlib  # <--- Yahan 'os' hona chahiye
+import sqlite3, os, csv, io, hashlib
 from datetime import datetime, date
 from functools import wraps
 
 app = Flask(__name__)
-
-
 app.secret_key = "crm_secret_2025"
 DB = os.path.join(os.path.dirname(__file__), "crm.db")
 
@@ -975,15 +966,9 @@ def notif_count():
     return jsonify({"count": n})
 
 if __name__ == "__main__":
-    # Render environmental variable 'PORT' provide karta hai (default 10000)
-    port = int(os.environ.get("PORT", 10000))
-    # host='0.0.0.0' hona zaroori hai taaki external network se access ho sake
-    app.run(host='0.0.0.0', port=port)
-
-# if __name__ == "__main__":
-#     print("\n" + "="*55)
-#     print("  🚀 TELECALLER CRM — http://localhost:5000")
-#     print("  📋 Lead Form   — http://localhost:5000/form")
-#     print("  🔐 Admin Login — admin / admin123")
-#     print("="*55 + "\n")
-#     app.run(debug=True, host="0.0.0.0", port=5000)
+    print("\n" + "="*55)
+    print("  🚀 TELECALLER CRM — http://localhost:5000")
+    print("  📋 Lead Form   — http://localhost:5000/form")
+    print("  🔐 Admin Login — admin / admin123")
+    print("="*55 + "\n")
+    app.run(debug=True, host="0.0.0.0", port=5000)
