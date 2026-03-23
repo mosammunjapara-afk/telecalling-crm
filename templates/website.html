@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caryanams — Ahmedabad ka #1 Car Marketplace</title>
+<meta name="description" content="New ya used car kharidein ya bechein. Car loan, insurance, RC transfer — sab kuch ek jagah. Free expert consultation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#060A12;
+--bg2:#0C1220;
+--bg3:#101828;
+--surface:#141E2E;
+--surface2:#1A2540;
+--border:rgba(255,255,255,.08);
+--border2:rgba(255,255,255,.14);
+--text:#F0F4FF;
+--text2:#8B9BBE;
+--text3:#4A5878;
+--blue:#3B6EF8;
+--blue2:#2952E3;
+--blueL:rgba(59,110,248,.12);
+--blueG:linear-gradient(135deg,#3B6EF8,#7C5CE8);
+--gold:#F5A623;
+--goldL:rgba(245,166,35,.12);
+--green:#00D4AA;
+--greenL:rgba(0,212,170,.12);
+--red:#FF4D6D;
+--white:#FFFFFF;
+--radius:12px;
+--radius2:20px;
+--shadow:0 4px 24px rgba(0,0,0,.4);
+--shadow2:0 20px 60px rgba(0,0,0,.5);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:2px}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:68px;display:flex;align-items:center;padding:0 6%;transition:all .3s}
+.nav.scrolled{background:rgba(6,10,18,.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-wrap{max-width:1280px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-mark{width:44px;height:44px;background:var(--blueG);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(59,110,248,.4);flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.4px}
+.logo-sub{font-size:10px;color:var(--text3);font-weight:500;margin-top:-2px}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.01em;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--blue);border-radius:1px;transform:scaleX(0);transition:transform .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta-btn{padding:10px 22px;background:var(--blue);color:white;border-radius:var(--radius);font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;letter-spacing:.02em}
+.nav-cta-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(59,110,248,.5)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{width:24px;height:2px;background:var(--text2);border-radius:1px;transition:all .3s}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(6,10,18,.97);z-index:199;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:var(--text);text-decoration:none;font-family:'Syne',sans-serif;font-size:28px;font-weight:700;transition:color .2s}
+.mobile-menu a:hover{color:var(--blue)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 6% 60px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 70% at 60% 0%,rgba(59,110,248,.14),transparent 60%),radial-gradient(ellipse 60% 60% at 10% 80%,rgba(124,92,232,.1),transparent 60%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at center,black 20%,transparent 80%)}
+.hero-wrap{max-width:1280px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;position:relative;z-index:1}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;background:rgba(59,110,248,.1);border:1px solid rgba(59,110,248,.25);border-radius:100px;font-size:12px;font-weight:600;color:#93B4FF;margin-bottom:24px;letter-spacing:.04em}
+.hero-pill .dot{width:6px;height:6px;background:#3B6EF8;border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(38px,5.5vw,64px);font-weight:900;line-height:1.08;letter-spacing:-1.5px;margin-bottom:22px}
+.hero h1 .accent{background:linear-gradient(135deg,#60A5FA 0%,#A78BFA 50%,#F472B6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:17px;color:var(--text2);line-height:1.75;margin-bottom:36px;max-width:480px;font-weight:400}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:52px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;background:var(--blue);color:white;border-radius:var(--radius);font-size:15px;font-weight:700;text-decoration:none;transition:all .25s;letter-spacing:.02em;box-shadow:0 4px 20px rgba(59,110,248,.4)}
+.btn-primary:hover{background:var(--blue2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(59,110,248,.55)}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;background:transparent;color:var(--text);border-radius:var(--radius);font-size:15px;font-weight:600;text-decoration:none;border:1.5px solid var(--border2);transition:all .25s}
+.btn-outline:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.25);transform:translateY(-2px)}
+.hero-stats{display:flex;gap:0;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)}
+.hstat{flex:1;padding:18px 20px;border-right:1px solid var(--border);text-align:center}
+.hstat:last-child{border:none}
+.hstat .n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--white);line-height:1}
+.hstat .l{font-size:11px;color:var(--text3);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── FORM CARD ── */
+.form-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:36px;position:relative;overflow:hidden}
+.form-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(59,110,248,.2),transparent);pointer-events:none}
+.fc-label{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--white);margin-bottom:4px}
+.fc-sub{font-size:13px;color:var(--text3);margin-bottom:24px}
+.ftabs{display:grid;grid-template-columns:1fr 1fr;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:24px}
+.ftab{padding:11px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ftab.on{background:var(--blue);color:white;box-shadow:0 3px 10px rgba(59,110,248,.4)}
+.fpanel{display:none}.fpanel.on{display:block}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.fg input,.fg select,.fg textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;outline:none}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--text3)}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);background:rgba(59,110,248,.06);box-shadow:0 0 0 3px rgba(59,110,248,.12)}
+.fg select{cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A5878' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.fg select option{background:#101828}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;padding:14px;background:var(--blue);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.02em;box-shadow:0 4px 16px rgba(59,110,248,.35);margin-top:6px}
+.submit-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,110,248,.5)}
+.submit-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.trust-pills{display:flex;gap:10px;margin-top:14px;justify-content:center;flex-wrap:wrap}
+.trust-pill{font-size:11px;color:var(--text3);font-weight:500;display:flex;align-items:center;gap:4px}
+
+/* ── SECTION BASE ── */
+.sec{padding:96px 6%}
+.sec-wrap{max-width:1280px;margin:0 auto}
+.sec-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--blueL);border:1px solid rgba(59,110,248,.25);border-radius:100px;font-size:11px;font-weight:700;color:#93B4FF;text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+.sec-h{font-family:'Syne',sans-serif;font-size:clamp(30px,4vw,48px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+.sec-sub{font-size:16px;color:var(--text2);max-width:560px;line-height:1.75}
+.center{text-align:center}
+.center .sec-sub{margin-left:auto;margin-right:auto}
+
+/* ── SERVICES ── */
+.services-bg{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-top:56px}
+.svc-item{background:var(--bg2);padding:36px;transition:all .25s;cursor:default;position:relative;overflow:hidden}
+.svc-item::before{content:'';position:absolute;inset:0;background:var(--blueL);opacity:0;transition:opacity .25s}
+.svc-item:hover::before{opacity:1}
+.svc-item:hover{transform:none}
+.svc-ico{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:20px;position:relative}
+.svc-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:10px;position:relative}
+.svc-desc{font-size:14px;color:var(--text2);line-height:1.7;position:relative}
+.svc-arrow{position:absolute;top:36px;right:36px;color:var(--text3);font-size:18px;transition:all .25s;opacity:0}
+.svc-item:hover .svc-arrow{opacity:1;transform:translate(3px,-3px)}
+
+/* ── PROCESS ── */
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:64px;position:relative}
+.process-line{position:absolute;top:44px;left:calc(12.5% + 10px);right:calc(12.5% + 10px);height:1px;background:linear-gradient(90deg,var(--border),var(--blue),var(--border))}
+.proc-item{text-align:center;position:relative}
+.proc-num{width:88px;height:88px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;position:relative;z-index:1;transition:all .3s}
+.proc-num .n{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;background:var(--blueG);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.proc-item:hover .proc-num{background:var(--blueL);border-color:var(--blue);box-shadow:0 0 0 8px rgba(59,110,248,.08)}
+.proc-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:8px}
+.proc-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* ── WHY US ── */
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:0}
+.why-feat{display:flex;gap:18px;margin-bottom:32px;align-items:flex-start}
+.why-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.why-feat h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px}
+.why-feat p{font-size:14px;color:var(--text2);line-height:1.65}
+.stats-panel{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:14px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:var(--bg3);border-radius:12px;border:1px solid var(--border)}
+.stat-row .label{font-size:13px;color:var(--text2);font-weight:500}
+.stat-row .val{font-family:'Syne',sans-serif;font-size:26px;font-weight:900;color:var(--white)}
+.stat-row .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-green{background:var(--greenL);color:var(--green)}
+.badge-gold{background:var(--goldL);color:var(--gold)}
+.badge-blue{background:var(--blueL);color:#93B4FF}
+
+/* ── TESTIMONIALS ── */
+.testi-bg{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;transition:all .25s;position:relative;overflow:hidden}
+.testi-card::before{content:'❝';position:absolute;top:16px;right:20px;font-size:60px;color:var(--blue);opacity:.08;font-family:serif;line-height:1}
+.testi-card:hover{border-color:rgba(59,110,248,.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.stars{color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:14px}
+.testi-text{font-size:14px;color:var(--text2);line-height:1.75;margin-bottom:20px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:12px}
+.tavi{width:42px;height:42px;border-radius:50%;background:var(--blueG);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:white;flex-shrink:0}
+.tname{font-size:14px;font-weight:700;color:var(--white)}
+.tloc{font-size:12px;color:var(--text3)}
+
+/* ── CAR TYPES ── */
+.cars-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+.car-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;cursor:pointer;transition:all .25s;text-decoration:none;display:block}
+.car-card:hover{border-color:rgba(59,110,248,.4);background:var(--blueL);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.car-emoji{font-size:42px;margin-bottom:14px;display:block;line-height:1}
+.car-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px}
+.car-desc{font-size:12px;color:var(--text3)}
+
+/* ── CTA ── */
+.cta-sec{padding:96px 6%;background:linear-gradient(135deg,rgba(59,110,248,.08),rgba(124,92,232,.08));border-top:1px solid var(--border);position:relative;overflow:hidden}
+.cta-sec::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(59,110,248,.15),transparent 70%);pointer-events:none}
+.cta-inner{max-width:700px;margin:0 auto;text-align:center;position:relative;z-index:1}
+
+/* ── CONTACT STRIP ── */
+.contact-strip{background:var(--surface);border-top:1px solid var(--border);padding:28px 6%}
+.cs-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.cs-item{display:flex;align-items:center;gap:12px}
+.cs-ico{width:44px;height:44px;background:var(--blueL);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.cs-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.cs-val{font-size:15px;font-weight:700;color:var(--white)}
+.cs-val a{color:inherit;text-decoration:none}
+
+/* ── FOOTER ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:64px 6% 32px}
+.footer-wrap{max-width:1280px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:48px}
+.footer-brand p{font-size:14px;color:var(--text3);margin-top:14px;line-height:1.7;max-width:280px}
+.footer-col h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--white);margin-bottom:18px;text-transform:uppercase;letter-spacing:.08em}
+.footer-col a{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);text-decoration:none;margin-bottom:12px;transition:color .2s}
+.footer-col a:hover{color:var(--white)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:28px;border-top:1px solid var(--border);font-size:13px;color:var(--text3);flex-wrap:wrap;gap:12px}
+.footer-socials{display:flex;gap:10px}
+.social-btn{width:36px;height:36px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;transition:all .2s}
+.social-btn:hover{background:var(--blueL);border-color:var(--blue)}
+
+/* ── SUCCESS MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(6,10,18,.9);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(16px)}
+.overlay.open{display:flex}
+.success-modal{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:52px 44px;max-width:460px;width:100%;text-align:center}
+.success-ico{width:88px;height:88px;background:var(--greenL);border:2px solid rgba(0,212,170,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:40px;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(0) rotate(-10deg)}100%{transform:scale(1) rotate(0)}}
+.success-modal h2{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;margin-bottom:10px;letter-spacing:-.5px}
+.success-modal p{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+.success-modal .close-btn{display:inline-flex;align-items:center;gap:8px;margin-top:28px;padding:13px 28px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.success-modal .close-btn:hover{background:var(--blue2)}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .nav-links,.nav-cta-btn{display:none}
+  .hamburger{display:flex}
+  .hero-wrap{grid-template-columns:1fr;gap:48px}
+  .hero{padding:90px 5% 60px;text-align:center}
+  .hero-desc{margin-left:auto;margin-right:auto}
+  .hero-actions{justify-content:center}
+  .hero-stats{flex-wrap:wrap}
+  .svc-grid{grid-template-columns:1fr;gap:0}
+  .process-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .process-line{display:none}
+  .why-grid{grid-template-columns:1fr;gap:40px}
+  .testi-grid{grid-template-columns:1fr}
+  .cars-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px}
+  .cs-inner{justify-content:center}
+  .g2{grid-template-columns:1fr}
+  .form-card{padding:24px}
+}
+@media(max-width:500px){
+  .cars-grid{grid-template-columns:1fr 1fr}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <div class="nav-wrap">
+    <a href="#" class="logo">
+      <div class="logo-mark">🚗</div>
+      <div>
+        <div class="logo-text">Caryanams</div>
+        <div class="logo-sub">Ahmedabad ka #1 Car Marketplace</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#why">Why Us</a>
+      <a href="#cars">Car Types</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="#enquiry" class="nav-cta-btn">Free Enquiry 🚀</a>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="toggleMenu()">Services</a>
+  <a href="#process" onclick="toggleMenu()">Process</a>
+  <a href="#why" onclick="toggleMenu()">Why Us</a>
+  <a href="#reviews" onclick="toggleMenu()">Reviews</a>
+  <a href="#enquiry" onclick="toggleMenu()" style="color:var(--blue)">Free Enquiry →</a>
+</div>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="enquiry">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-wrap">
+
+    <!-- LEFT -->
+    <div>
+      <div class="hero-pill"><span class="dot"></span> Ahmedabad ka #1 Trusted Platform</div>
+      <h1>Apni Car <span class="accent">Kharidein ya Bechein</span> — Bilkul Aasaan</h1>
+      <p class="hero-desc">New ya used car, loan, insurance, RC transfer — sab kuch ek hi jagah. Expert aapko 24 ghante mein callback denge. Koi charge nahi.</p>
+      <div class="hero-actions">
+        <a href="#enquiry" class="btn-primary" onclick="document.getElementById('tab-buy').click()">🚗 Car Kharidna Hai</a>
+        <a href="#enquiry" class="btn-outline" onclick="document.getElementById('tab-sell').click()">💰 Car Bechni Hai</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="n">5K+</div><div class="l">Cars Sold</div></div>
+        <div class="hstat"><div class="n">98%</div><div class="l">Satisfied</div></div>
+        <div class="hstat"><div class="n">24hr</div><div class="l">Callback</div></div>
+        <div class="hstat"><div class="n">10Y+</div><div class="l">Experience</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: FORM -->
+    <div class="form-card" id="formCard">
+      <div class="fc-label">Free Enquiry Bhejein</div>
+      <div class="fc-sub">Expert 24 ghante mein callback · Zero charge</div>
+
+      <div class="ftabs">
+        <button class="ftab on" id="tab-buy" onclick="swTab('buy',this)">🚗 Car Kharidna</button>
+        <button class="ftab" id="tab-sell" onclick="swTab('sell',this)">💰 Car Bechna</button>
+      </div>
+
+      <!-- BUY FORM -->
+      <div class="fpanel on" id="panel-buy">
+        <form onsubmit="submitLead(event,'buy')">
+          <div class="g2">
+            <div class="fg"><label>Aapka Naam *</label><input name="name" placeholder="Pura naam" required></div>
+            <div class="fg"><label>Phone *</label><input name="phone" placeholder="10-digit" inputmode="numeric" maxlength="12" required oninput="this.value=this.value.replace(/\D/g,'')"></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Email</label><input name="email" type="email" placeholder="aap@email.com"></div>
+            <div class="fg"><label>City *</label><input name="city" placeholder="Aapka sheher" required></div>
+          </div>
+          <div class="fg"><label>Kaun si Car?</label>
+            <select name="car">
+              <option value="">— Select Brand —</option>
+              <option>Maruti Suzuki</option><option>Hyundai</option><option>Tata Motors</option>
+              <option>Honda</option><option>Toyota</option><option>Mahindra</option>
+              <option>Kia</option><option>MG Motor</option><option>Renault</option>
+              <option>Ford</option><option>BMW</option><option>Mercedes</option>
+              <option>Audi</option><option>Koi bhi chalega</option>
+            </select>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Budget</label>
+              <select name="budget">
+                <option value="">— Select —</option>
+                <option>3 – 5 Lakh</option><option>5 – 8 Lakh</option>
+                <option>8 – 12 Lakh</option><option>12 – 20 Lakh</option>
+                <option>20 – 35 Lakh</option><option>35 Lakh se zyada</option>
+              </select>
+            </div>
+            <div class="fg"><label>Loan Chahiye?</label>
+              <select name="loan">
+                <option value="">— Select —</option>
+                <option>Haan, chahiye</option><option>Nahi, cash</option><option>Decide nahi</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Message (Optional)</label>
+            <textarea name="notes" rows="2" placeholder="Koi khaas requirement? e.g. Automatic, 7-seater, white color..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn">🚀 Submit — Expert Call Karega!</button>
+          <div class="trust-pills">
+            <div class="trust-pill">🔒 Data Safe</div>
+            <div class="trust-pill">⚡ 24hr Callback</div>
+            <div class="trust-pill">✅ Free Service</div>
+            <div class="trust-pill">💬 WhatsApp Support</div>
+          </div>
+        </form>
+      </div>
+
+      <!-- SELL FORM -->
+      <div class="fpanel" id="panel-sell">
+        <form onsubmit="submitLead(event,'sell')">
+          <div class="g2">
+            <div class="fg"><label>Aapka Naam *</label><input name="name" placeholder="Pura naam" required></div>
+            <div class="fg"><label>Phone *</label><input name="phone" placeholder="10-digit" inputmode="numeric" maxlength="12" required oninput="this.value=this.value.replace(/\D/g,'')"></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Email</label><input name="email" type="email" placeholder="aap@email.com"></div>
+            <div class="fg"><label>City *</label><input name="city" placeholder="Aapka sheher" required></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Car Brand *</label>
+              <select name="brand" required>
+                <option value="">— Select —</option>
+                <option>Maruti Suzuki</option><option>Hyundai</option><option>Tata Motors</option>
+                <option>Honda</option><option>Toyota</option><option>Mahindra</option>
+                <option>Kia</option><option>MG Motor</option><option>Other</option>
+              </select>
+            </div>
+            <div class="fg"><label>Car Model *</label><input name="model" placeholder="e.g. Swift, Creta" required></div>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>Year</label>
+              <select name="year">
+                <option value="">— Select —</option>
+                <script>for(let y=2024;y>=2005;y--)document.write(`<option>${y}</option>`)</script>
+              </select>
+            </div>
+            <div class="fg"><label>Expected Price</label>
+              <select name="budget">
+                <option value="">— Select —</option>
+                <option>1 – 3 Lakh</option><option>3 – 5 Lakh</option>
+                <option>5 – 8 Lakh</option><option>8 – 12 Lakh</option><option>12 Lakh+</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg"><label>Condition / Extra Details (Optional)</label>
+            <textarea name="notes" rows="2" placeholder="Kilometers, accident history, modifications..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn">💰 Free Valuation Request!</button>
+          <div class="trust-pills">
+            <div class="trust-pill">🔒 Data Safe</div>
+            <div class="trust-pill">⚡ 24hr Callback</div>
+            <div class="trust-pill">✅ Free Valuation</div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════ SERVICES ════ -->
+<section class="sec services-bg" id="services">
+  <div class="sec-wrap">
+    <div class="center reveal">
+      <div class="sec-tag">Our Services</div>
+      <h2 class="sec-h">Hum Kya Karte Hain</h2>
+      <p class="sec-sub">New car ho ya used, loan ho ya insurance — Caryanams mein sab kuch milega ek hi jagah.</p>
+    </div>
+    <div class="svc-grid reveal">
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:var(--blueL)">🚗</div>
+        <div class="svc-title">New Car Purchase</div>
+        <p class="svc-desc">Market ki best price pe new car. Sab top brands — Maruti, Hyundai, Tata, Honda, Toyota aur bahut zyada. Showroom tak jaane ki zaroorat nahi.</p>
+      </div>
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:var(--greenL)">🔄</div>
+        <div class="svc-title">Used Car Buy / Sell</div>
+        <p class="svc-desc">Certified pre-owned cars ka sabse bada selection. Apni car becho ya kharedo — 100% transparent dealing, koi chhupa hua charge nahi.</p>
+      </div>
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:var(--goldL)">🏦</div>
+        <div class="svc-title">Car Loan & Finance</div>
+        <p class="svc-desc">Easy EMI, low interest rates. 20+ banks se best deal. Salaried ya self-employed — same day approval possible. Zero prepayment charges.</p>
+      </div>
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:rgba(124,92,232,.12)">🛡️</div>
+        <div class="svc-title">Car Insurance</div>
+        <p class="svc-desc">Comprehensive aur third-party — best premium rate guaranteed. 10+ insurance companies compare karke best plan dhundhte hain.</p>
+      </div>
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:rgba(239,68,68,.1)">📋</div>
+        <div class="svc-title">RC Transfer & Papers</div>
+        <p class="svc-desc">RC transfer, NOC, Form 35, hypothecation removal — sab documents ki hassle-free processing. Aapko RTO jaane ki zaroorat nahi.</p>
+      </div>
+      <div class="svc-item">
+        <span class="svc-arrow">↗</span>
+        <div class="svc-ico" style="background:rgba(14,165,233,.1)">🔍</div>
+        <div class="svc-title">Car Inspection</div>
+        <p class="svc-desc">Used car lene se pehle 150-point expert inspection. Engine, chassis, body, electronics — sab check. Transparent report, no surprises.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ CAR TYPES ════ -->
+<section class="sec" id="cars">
+  <div class="sec-wrap">
+    <div class="center reveal">
+      <div class="sec-tag">Browse by Type</div>
+      <h2 class="sec-h">Kaun si Car Chahiye?</h2>
+      <p class="sec-sub">Apni zaroorat ke hisaab se car type select karo aur free enquiry bhejo.</p>
+    </div>
+    <div class="cars-grid reveal">
+      <a href="#enquiry" class="car-card" onclick="prefillCar('Hatchback')">
+        <span class="car-emoji">🚙</span>
+        <div class="car-name">Hatchback</div>
+        <div class="car-desc">Swift, i20, Punch, Tiago</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('Sedan')">
+        <span class="car-emoji">🚗</span>
+        <div class="car-name">Sedan</div>
+        <div class="car-desc">City, Verna, Amaze, Dzire</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('SUV')">
+        <span class="car-emoji">🛻</span>
+        <div class="car-name">SUV / Crossover</div>
+        <div class="car-desc">Creta, Nexon, XUV, Seltos</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('Electric (EV)')">
+        <span class="car-emoji">⚡</span>
+        <div class="car-name">Electric (EV)</div>
+        <div class="car-desc">Nexon EV, MG ZS EV, Tata Tiago EV</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('MUV / MPV')">
+        <span class="car-emoji">🚐</span>
+        <div class="car-name">MUV / MPV</div>
+        <div class="car-desc">Ertiga, Marazzo, Innova</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('Luxury')">
+        <span class="car-emoji">🏎️</span>
+        <div class="car-name">Luxury</div>
+        <div class="car-desc">BMW, Mercedes, Audi, Volvo</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="prefillCar('Pre-owned (Used)')">
+        <span class="car-emoji">🔄</span>
+        <div class="car-name">Pre-owned</div>
+        <div class="car-desc">Certified used cars, best deals</div>
+      </a>
+      <a href="#enquiry" class="car-card" onclick="document.getElementById('tab-sell').click()">
+        <span class="car-emoji">💰</span>
+        <div class="car-name">Sell Your Car</div>
+        <div class="car-desc">Best price, instant valuation</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ PROCESS ════ -->
+<section class="sec services-bg" id="process">
+  <div class="sec-wrap">
+    <div class="center reveal">
+      <div class="sec-tag">How It Works</div>
+      <h2 class="sec-h">Kaise Kaam Karta Hai?</h2>
+      <p class="sec-sub">4 aasaan steps mein apni car kharidein ya bechein — bilkul jhamela-free</p>
+    </div>
+    <div class="process-grid reveal">
+      <div class="process-line"></div>
+      <div class="proc-item">
+        <div class="proc-num"><span class="n">1</span></div>
+        <div class="proc-title">Form Bharein</div>
+        <p class="proc-desc">Upar form mein naam, phone aur city bharein. 2 minute ka kaam. Koi documents nahi chahiye abhi.</p>
+      </div>
+      <div class="proc-item">
+        <div class="proc-num"><span class="n">2</span></div>
+        <div class="proc-title">Expert Call</div>
+        <p class="proc-desc">Hamare car expert 24 ghante mein call karenge. Aapki requirements samjhenge.</p>
+      </div>
+      <div class="proc-item">
+        <div class="proc-num"><span class="n">3</span></div>
+        <div class="proc-title">Best Options</div>
+        <p class="proc-desc">Budget aur zaroorat ke hisaab se best car options WhatsApp pe share honge. Photos, price sab kuch.</p>
+      </div>
+      <div class="proc-item">
+        <div class="proc-num"><span class="n">4</span></div>
+        <div class="proc-title">Deal Done! 🎉</div>
+        <p class="proc-desc">Aapki dream car — best price pe. Loan, insurance, papers — sab hum handle karenge.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ WHY US ════ -->
+<section class="sec" id="why">
+  <div class="sec-wrap">
+    <div class="why-grid">
+      <div class="reveal">
+        <div class="sec-tag">Why Caryanams</div>
+        <h2 class="sec-h">Kyun Choose Karein Hume?</h2>
+        <p class="sec-sub" style="margin-bottom:40px">Ahmedabad mein 10 saal ka experience. Hazaron satisfied customers. Numbers khud bolte hain.</p>
+        <div class="why-feat">
+          <div class="why-ico" style="background:var(--blueL)">✅</div>
+          <div><h4>100% Transparent Dealing</h4><p>Koi hidden charges nahi. Jo bolein wo hi milega. Dealer aur customer ke beech hum honest bridge hain.</p></div>
+        </div>
+        <div class="why-feat">
+          <div class="why-ico" style="background:var(--greenL)">💰</div>
+          <div><h4>Best Price Guarantee</h4><p>Market se sasta nahi milega toh hum price match karenge. Koi sawaal nahi.</p></div>
+        </div>
+        <div class="why-feat">
+          <div class="why-ico" style="background:var(--goldL)">⚡</div>
+          <div><h4>Fast Process</h4><p>Same day loan approval. 24 ghante mein callback. Aapka time waste nahi hoga.</p></div>
+        </div>
+        <div class="why-feat">
+          <div class="why-ico" style="background:rgba(124,92,232,.12)">🤝</div>
+          <div><h4>After-Sale Support</h4><p>Car lene ke baad bhi hum saath hain. Insurance renewal, service, resale — sab mein help.</p></div>
+        </div>
+      </div>
+      <div class="stats-panel reveal">
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--white);margin-bottom:4px">Our Numbers</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Jo baat karte hain, prove karte hain</div>
+        <div class="stat-row">
+          <div class="label">Cars Sold This Year</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="val">1,247</div><span class="badge badge-green">+23%</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Customer Satisfaction</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="val">98%</div><span class="badge badge-gold">⭐⭐⭐⭐⭐</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Loans Approved</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="val">856</div><span class="badge badge-blue">Same Day</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Avg. Response Time</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="val">&lt;2hr</div><span class="badge badge-green">Fast ⚡</span></div>
+        </div>
+        <div class="stat-row">
+          <div class="label">Years in Business</div>
+          <div style="display:flex;align-items:center;gap:10px"><div class="val">10+</div><span class="badge badge-blue">Trusted</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ TESTIMONIALS ════ -->
+<section class="sec testi-bg" id="reviews">
+  <div class="sec-wrap">
+    <div class="center reveal">
+      <div class="sec-tag">Customer Reviews</div>
+      <h2 class="sec-h">Hamare Customers Kya Kehte Hain</h2>
+    </div>
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Bahut hi badhiya service! Mujhe Swift Dzire chahiye thi — inke expert ne 1 din mein best deal dila di. Loan bhi turant approve ho gaya. Bahut recommend karunga!"</p>
+        <div class="testi-author">
+          <div class="tavi">R</div>
+          <div><div class="tname">Rahul Patel</div><div class="tloc">📍 Ahmedabad</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Maine apni purani Creta bechni thi. Caryanams ne market se ₹60,000 zyada price dilaya! Sab documents bhi inhi ne handle kiye. Zero jhanjhat!"</p>
+        <div class="testi-author">
+          <div class="tavi">P</div>
+          <div><div class="tname">Priya Shah</div><div class="tloc">📍 Surat</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Used car leni thi, insurance ke saath. Expert ne 5 options dikhaye, test drive karaya, best price pe Nexon dila di. Process bilkul smooth tha!"</p>
+        <div class="testi-author">
+          <div class="tavi">A</div>
+          <div><div class="tname">Amit Desai</div><div class="tloc">📍 Vadodara</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ CTA ════ -->
+<section class="cta-sec">
+  <div class="cta-inner reveal">
+    <div class="sec-tag" style="margin:0 auto 18px">Free Consultation</div>
+    <h2 class="sec-h">Ready Hain? Abhi Enquiry Bhejein!</h2>
+    <p style="font-size:16px;color:var(--text2);margin:14px 0 36px;line-height:1.75">Koi commitment nahi, koi charge nahi. Sirf apna naam aur phone number do — expert baaki sab sambhal lega.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="#enquiry" class="btn-primary" style="font-size:16px;padding:16px 34px">🚀 Free Enquiry Bhejein</a>
+      <a href="tel:+919000000001" class="btn-outline" style="font-size:16px;padding:16px 34px">📞 Direct Call</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ CONTACT STRIP ════ -->
+<div class="contact-strip" id="contact">
+  <div class="cs-inner">
+    <div class="cs-item">
+      <div class="cs-ico">📞</div>
+      <div><div class="cs-label">Phone / WhatsApp</div><div class="cs-val"><a href="tel:+919000000001">+91 90000 00001</a></div></div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-ico">✉️</div>
+      <div><div class="cs-label">Email</div><div class="cs-val"><a href="mailto:info@caryanams.com">info@caryanams.com</a></div></div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-ico">📍</div>
+      <div><div class="cs-label">Location</div><div class="cs-val">Ahmedabad, Gujarat</div></div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-ico">⏰</div>
+      <div><div class="cs-label">Working Hours</div><div class="cs-val">Mon–Sat: 9AM – 7PM</div></div>
+    </div>
+    <a href="#enquiry" class="btn-primary">Get Free Callback →</a>
+  </div>
+</div>
+
+<!-- ════ FOOTER ════ -->
+<footer>
+  <div class="footer-wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-mark">🚗</div>
+          <div><div class="logo-text">Caryanams</div><div class="logo-sub">India ka Trusted Car Marketplace</div></div>
+        </div>
+        <p>Ahmedabad ka sabse trusted car marketplace. New, used, loan, insurance — sab kuch ek jagah. 10 saal ka experience, 5000+ happy customers.</p>
+        <div style="display:flex;gap:8px;margin-top:18px">
+          <a href="#" class="social-btn">📘</a>
+          <a href="#" class="social-btn">📸</a>
+          <a href="https://wa.me/919000000001" class="social-btn">💬</a>
+          <a href="#" class="social-btn">▶️</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <a href="#services">🚗 New Car Purchase</a>
+        <a href="#services">🔄 Used Car Buy/Sell</a>
+        <a href="#services">🏦 Car Loan & Finance</a>
+        <a href="#services">🛡️ Car Insurance</a>
+        <a href="#services">📋 RC Transfer</a>
+        <a href="#services">🔍 Car Inspection</a>
+      </div>
+      <div class="footer-col">
+        <h4>Car Types</h4>
+        <a href="#enquiry">🚙 Hatchback</a>
+        <a href="#enquiry">🚗 Sedan</a>
+        <a href="#enquiry">🛻 SUV / Crossover</a>
+        <a href="#enquiry">⚡ Electric (EV)</a>
+        <a href="#enquiry">🚐 MUV / MPV</a>
+        <a href="#enquiry">🏎️ Luxury Cars</a>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="#process">How It Works</a>
+        <a href="#why">Why Caryanams</a>
+        <a href="#reviews">Customer Reviews</a>
+        <a href="#enquiry">Free Enquiry</a>
+        <a href="/login">Admin Login</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Caryanams. All rights reserved.</div>
+      <div>Made with ❤️ in Ahmedabad, Gujarat</div>
+    </div>
+  </div>
+</footer>
+
+<!-- SUCCESS MODAL -->
+<div class="overlay" id="successOverlay">
+  <div class="success-modal">
+    <div class="success-ico">✅</div>
+    <h2>Shukriya! 🎉</h2>
+    <p id="successMsg">Aapka enquiry successfully submit ho gaya!</p>
+    <p style="font-size:13px;color:var(--text3)">Hamare expert <strong style="color:#60A5FA">24 ghante</strong> mein aapko call karenge.<br>WhatsApp pe bhi update milega.</p>
+    <button class="close-btn" onclick="closeSuccess()">✓ Theek Hai, Shukriya!</button>
+  </div>
+</div>
+
+<script>
+// ── NAV SCROLL ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40)
+})
+
+// ── MOBILE MENU ──
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open')
+}
+
+// ── TAB SWITCH ──
+function swTab(tab, el){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'))
+  document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'))
+  el.classList.add('on')
+  document.getElementById('panel-'+tab).classList.add('on')
+}
+
+// ── PREFILL CAR TYPE ──
+function prefillCar(type){
+  setTimeout(()=>{
+    document.getElementById('tab-buy').click()
+    const sel = document.querySelector('#panel-buy select[name=car]')
+    if(sel){
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].text.toLowerCase().includes(type.toLowerCase())){
+          sel.selectedIndex=i; break
+        }
+      }
+    }
+  }, 300)
+}
+
+// ── FORM SUBMIT ──
+async function submitLead(e, type){
+  e.preventDefault()
+  const form = e.target
+  const btn = form.querySelector('button[type=submit]')
+  const origText = btn.textContent
+  btn.disabled = true
+  btn.textContent = '⏳ Submit ho raha hai...'
+
+  const fd = new FormData(form)
+  const name = (fd.get('name')||'').trim()
+  const phone = (fd.get('phone')||'').trim()
+  const city = (fd.get('city')||'').trim()
+
+  if(!name || phone.length < 10){
+    alert('Naam aur valid 10-digit phone zaroori hai!')
+    btn.disabled=false; btn.textContent=origText; return
+  }
+
+  // Build product string
+  let product = ''
+  if(type==='buy'){
+    const car = fd.get('car')||''
+    const budget = fd.get('budget')||''
+    const loan = fd.get('loan')||''
+    product = ['Buy', car, budget, loan?`Loan:${loan}`:''].filter(Boolean).join(' | ')
+  } else {
+    product = ['SELL', fd.get('brand'), fd.get('model'), fd.get('year')].filter(Boolean).join(' | ')
+  }
+
+  const postData = new FormData()
+  postData.append('name', name)
+  postData.append('phone', phone)
+  postData.append('whatsapp', phone)
+  postData.append('email', fd.get('email')||'')
+  postData.append('city', city)
+  postData.append('source', 'Website')
+  postData.append('product', product || (type==='buy'?'Car Kharidna':'Car Bechna'))
+  postData.append('budget', fd.get('budget')||'')
+  postData.append('notes', fd.get('notes')||'')
+
+  try{ await fetch('/form',{method:'POST',body:postData}) }catch(err){}
+
+  // Show success
+  document.getElementById('successMsg').textContent =
+    type==='buy'
+      ? `${name} ji, aapki car buying enquiry mil gayi! Expert call karega.`
+      : `${name} ji, free valuation request mil gayi! Best price ke saath call aayega.`
+  document.getElementById('successOverlay').classList.add('open')
+  form.reset()
+  btn.disabled=false; btn.textContent=origText
+}
+
+function closeSuccess(){
+  document.getElementById('successOverlay').classList.remove('open')
+}
+
+// ── SCROLL REVEAL ──
+const revealObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible') })
+},{threshold:0.1})
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el))
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target = document.querySelector(a.getAttribute('href'))
+    if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth',block:'start'}) }
+  })
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — Telecaller CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;background:#0B0F1A}
+.left{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px;background:linear-gradient(145deg,#0B0F1A,#0F1629,#141B2D);position:relative;overflow:hidden}
+.left::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.15),transparent 70%);top:-100px;left:-100px;border-radius:50%}
+.left::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.1),transparent 70%);bottom:-50px;right:-50px;border-radius:50%}
+.brand{position:relative;z-index:1;text-align:center}
+.brand-logo{width:72px;height:72px;background:linear-gradient(135deg,#2563EB,#7C3AED);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px;box-shadow:0 8px 32px rgba(37,99,235,.4)}
+.brand h1{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:white;margin-bottom:8px}
+.brand p{color:rgba(255,255,255,.45);font-size:15px;line-height:1.6;max-width:300px}
+.features{margin-top:48px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+.feat{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.6);font-size:14px}
+.feat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.right{width:460px;display:flex;align-items:center;justify-content:center;padding:40px;background:white}
+.login-box{width:100%;max-width:380px}
+.login-box h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#0D1117;margin-bottom:6px}
+.login-box .sub{color:#6B7280;font-size:14px;margin-bottom:32px}
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em}
+.fg input{width:100%;padding:13px 16px;border:2px solid #E5E7EB;border-radius:12px;font-size:14px;background:#F9FAFB;color:#0D1117;transition:all .2s;font-family:'DM Sans',sans-serif}
+.fg input:focus{outline:none;border-color:#2563EB;background:white;box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;margin-top:4px;letter-spacing:.02em}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.4)}
+.error{background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:18px;font-weight:600}
+.divider{display:flex;align-items:center;gap:12px;margin:28px 0;color:#9CA3AF;font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#E5E7EB}
+.default-creds{background:#F0F7FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:16px}
+.cred-title{font-size:11px;font-weight:700;color:#1D4ED8;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+.cred-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #DBEAFE}
+.cred-row:last-child{border:none}
+.cred-label{color:#64748B;font-weight:500}
+.cred-val{color:#1D4ED8;font-weight:700;font-family:monospace;font-size:13px}
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="brand">
+    <div class="brand-logo">📞</div>
+    <h1>Telecaller CRM</h1>
+    <p>Complete lead management system — Website se lead lo, approve karo, aur convert karo</p>
+  </div>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon" style="background:rgba(37,99,235,.15)">🌐</div>
+      <div>Website lead form — automatic CRM mein aaye</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:rgba(124,58,237,.15)">🔐</div>
+      <div>Admin approve kare aur telecaller ko assign kare</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:rgba(5,150,105,.15)">📞</div>
+      <div>Click-to-Call — ek click mein seedha phone dial</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:rgba(37,211,102,.15)">💬</div>
+      <div>WhatsApp button — pre-written message ke saath</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:rgba(245,158,11,.15)">📁</div>
+      <div>Documents track karo — Aadhar, PAN, sab kuch</div>
+    </div>
+  </div>
+</div>
+<div class="right">
+  <div class="login-box">
+    <h2>Welcome back 👋</h2>
+    <p class="sub">Apna username aur password daalo</p>
+    {% if error %}<div class="error">⚠️ {{ error }}</div>{% endif %}
+    <form method="POST">
+      <div class="fg">
+        <label>Username</label>
+        <input name="username" placeholder="aapka username" autofocus autocomplete="username">
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="password" autocomplete="current-password">
+      </div>
+      <button type="submit" class="login-btn">🔐 Login karein</button>
+    </form>
+    <div class="divider">default credentials</div>
+    <div class="default-creds">
+      <div class="cred-title">🔑 Default Login</div>
+      <div class="cred-row"><span class="cred-label">Admin Username</span><span class="cred-val">admin</span></div>
+      <div class="cred-row"><span class="cred-label">Admin Password</span><span class="cred-val">admin123</span></div>
+      <div class="cred-row"><span class="cred-label">Telecallers</span><span class="cred-label" style="color:#64748B">Admin se add karein</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

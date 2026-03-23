@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}All Leads — CRM{% endblock %}
+{% block page_title %}👥 All Leads{% endblock %}
+{% block notif_items %}
+  {% for n in notifs %}<a href="{{ n.link or '#' }}" class="notif-item {% if not n.is_read %}unread{% endif %}" style="display:block;text-decoration:none"><div class="nt">{{ n.message }}</div><div class="nt-time">{{ n.created_at[5:16] }}</div></a>{% endfor %}
+{% endblock %}
+{% block content %}
+
+<form method="GET" action="/admin/leads" id="filterForm">
+<div class="filter-bar" style="flex-wrap:wrap;gap:8px">
+  <!-- Search -->
+  <input name="q" placeholder="🔍 Search name, phone..." value="{{ qs }}"
+         style="flex:1;min-width:180px" onkeydown="if(event.key==='Enter')this.form.submit()">
+
+  <!-- City Dropdown — from database -->
+  <select name="ct" onchange="this.form.submit()"
+          style="min-width:140px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer">
+    <option value="">📍 All Cities</option>
+    {% for city in cities %}
+    <option value="{{ city }}" {% if ct==city %}selected{% endif %}>📍 {{ city }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Admin Status -->
+  <select name="ast" onchange="this.form.submit()"
+          style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer">
+    <option value="">Admin Status</option>
+    {% for s in astatuses %}<option value="{{ s }}" {% if ast==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+
+  <!-- Lead Status -->
+  <select name="st" onchange="this.form.submit()"
+          style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer">
+    <option value="">Lead Status</option>
+    {% for s in statuses %}<option value="{{ s }}" {% if st==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+
+  <!-- Telecaller -->
+  <select name="ag" onchange="this.form.submit()"
+          style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer">
+    <option value="">All Telecallers</option>
+    {% for a in agents %}<option value="{{ a.id }}" {% if ag==a.id|string %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+  </select>
+
+  <!-- Source -->
+  <select name="src" onchange="this.form.submit()"
+          style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer">
+    <option value="">All Sources</option>
+    {% for s in sources %}<option value="{{ s }}" {% if src==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+
+  <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  <a href="/admin/leads" class="btn btn-ghost btn-sm">Clear</a>
+
+  <!-- PER PAGE -->
+  <div style="display:flex;align-items:center;gap:6px;margin-left:auto">
+    <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">Show:</span>
+    <select name="per" onchange="this.form.submit()"
+            style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:white;cursor:pointer;font-weight:600">
+      {% for n in [5,10,15,20,25] %}
+      <option value="{{ n }}" {% if per==n %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+    <span style="font-size:12px;color:var(--text3);white-space:nowrap">of <strong style="color:var(--text)">{{ total }}</strong></span>
+  </div>
+  <!-- Keep other params when changing per-page -->
+  <input type="hidden" name="q" value="{{ qs }}">
+  <input type="hidden" name="ct" value="{{ ct }}">
+  <input type="hidden" name="ast" value="{{ ast }}">
+  <input type="hidden" name="st" value="{{ st }}">
+  <input type="hidden" name="ag" value="{{ ag }}">
+  <input type="hidden" name="src" value="{{ src }}">
+</div>
+</form>
+
+<!-- STATUS FILTER TABS -->
+<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+  <a href="/admin/leads" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;border:1.5px solid var(--border);background:{% if not ast and not st %}var(--primary){% else %}white{% endif %};color:{% if not ast and not st %}white{% else %}var(--text2){% endif %}">All</a>
+  {% for s,clr in [('Pending','#F59E0B'),('Approved','#059669'),('Rejected','#EF4444'),('On Hold','#8B5CF6')] %}
+  <a href="/admin/leads?ast={{ s }}" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;border:1.5px solid {{ clr }};background:{% if ast==s %}{{ clr }}{% else %}{{ clr }}18{% endif %};color:{% if ast==s %}white{% else %}{{ clr }}{% endif %}">{{ s }}</a>
+  {% endfor %}
+  {% for s,clr in [('New','#3B82F6'),('Interested','#10B981'),('Follow-up','#F97316'),('Converted','#7C3AED'),('Not Answered','#F59E0B')] %}
+  <a href="/admin/leads?st={{ s }}" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;text-decoration:none;border:1.5px solid {{ clr }};background:{% if st==s %}{{ clr }}{% else %}{{ clr }}18{% endif %};color:{% if st==s %}white{% else %}{{ clr }}{% endif %}">{{ s }}</a>
+  {% endfor %}
+</div>
+
+<!-- ACTION BAR -->
+<div style="background:white;border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+
+  <!-- LEFT: Select controls -->
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text2)">
+      <input type="checkbox" id="chkMaster" onchange="masterToggle(this)"
+             style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary)">
+      Sab Select
+    </label>
+    <span id="selCount" style="font-size:12px;font-weight:700;color:var(--primary);padding:3px 10px;background:var(--primaryL,#EFF6FF);border-radius:20px;display:none"></span>
+    <button type="button" onclick="selNone()" id="clearBtn" style="display:none;font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline">Clear</button>
+  </div>
+
+  <!-- DIVIDER -->
+  <div style="width:1px;height:28px;background:var(--border);flex-shrink:0"></div>
+
+  <!-- MIDDLE: Quick actions -->
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Selected pe:</span>
+    <button type="button" onclick="bulkAction('approve')" class="btn btn-ghost btn-xs" style="border-color:#059669;color:#065F46">✅ Approve</button>
+    <button type="button" onclick="bulkAction('reject')" class="btn btn-ghost btn-xs" style="border-color:#EF4444;color:#991B1B">❌ Reject</button>
+  </div>
+
+  <!-- RIGHT: Export + Import -->
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <a href="/admin/leads/import" class="btn btn-primary btn-sm">📤 Import Excel</a>
+    <a href="/admin/export/excel" class="btn btn-success btn-sm">📊 Export</a>
+    <a href="/admin/export/csv" class="btn btn-ghost btn-sm">CSV</a>
+  </div>
+</div>
+
+<!-- TELECALLER ASSIGN PANEL (shows when leads selected) -->
+<div id="assignPanel" style="display:none;background:linear-gradient(135deg,#1A1A2E,#1A1040);border-radius:14px;padding:18px 20px;margin-bottom:14px;border:1.5px solid rgba(59,110,248,.3)">
+  <div style="font-size:13px;font-weight:700;color:#93B4FF;margin-bottom:14px">
+    🎯 <span id="assignCount">0</span> leads selected — Telecaller select karo aur naam click karo:
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px" id="tcCards">
+    {% for a in agents %}
+    <button type="button" onclick="assignToTelecaller('{{ a.id }}','{{ a.name }}')"
+      style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:10px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif"
+      onmouseover="this.style.background='rgba(59,110,248,.25)';this.style.borderColor='rgba(59,110,248,.6)'"
+      onmouseout="this.style.background='rgba(255,255,255,.06)';this.style.borderColor='rgba(255,255,255,.12)'">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B6EF8,#7C5CE8);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;flex-shrink:0">
+        {{ a.name[0]|upper }}
+      </div>
+      <div style="text-align:left">
+        <div style="font-size:13px;font-weight:700;color:white">{{ a.name }}</div>
+        {% if a.phone %}<div style="font-size:11px;color:rgba(255,255,255,.4)">{{ a.phone }}</div>{% endif %}
+      </div>
+    </button>
+    {% endfor %}
+  </div>
+  <div style="margin-top:10px;font-size:11px;color:rgba(255,255,255,.3)">
+    Naam click karne ke baad leads assign ho jaayengi aur telecaller ko notification milega
+  </div>
+</div>
+
+<!-- Hidden bulk form -->
+<form method="POST" action="/admin/leads/bulk" id="bulkForm" style="display:none">
+  <input type="hidden" name="bulk_action" id="bulkActionInput">
+  <input type="hidden" name="bulk_agent" id="bulkAgentInput">
+</form>
+
+<!-- LEADS TABLE -->
+<div class="card" style="padding:0;overflow:hidden">
+<div style="overflow-x:auto">
+<table class="table" style="min-width:900px">
+  <thead>
+    <tr>
+      <th><input type="checkbox" id="chkAll" onchange="togAll(this)" style="cursor:pointer;width:15px;height:15px"></th>
+      <th>#</th>
+      <th>Customer</th>
+      <th>📞 Contact</th>
+      <th>Product / Budget</th>
+      <th>Status</th>
+      <th>Approve / Reject</th>
+      <th>Assign & Call</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for lead in leads %}
+  <tr style="{% if lead.admin_status=='Pending' %}background:#FFFBEB{% elif lead.admin_status=='Rejected' %}background:#FFF5F5{% endif %}">
+    <td><input type="checkbox" class="lchk" value="{{ lead.id }}" onchange="updC()"></td>
+    <td style="color:var(--text3);font-size:11px;white-space:nowrap">
+      {{ lead.id }}<br>
+      <span style="font-size:10px">{{ lead.created_at[5:10] }}</span>
+    </td>
+    <td>
+      <div style="font-weight:700;color:#1e40af;font-size:13px">{{ lead.name }}</div>
+      <div class="text-muted">{{ lead.city or '' }}{% if lead.source %} · {{ lead.source }}{% endif %}</div>
+      <span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:{{ sc[lead.admin_status] }}22;color:{{ sc[lead.admin_status] }}">{{ lead.admin_status }}</span>
+    </td>
+    <td>
+      <!-- CLICK TO CALL -->
+      <a href="tel:{{ lead.phone }}"
+         style="display:flex;align-items:center;gap:5px;padding:6px 11px;background:#EFF6FF;color:#1D4ED8;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;border:1.5px solid #BFDBFE;margin-bottom:5px;transition:all .15s;white-space:nowrap"
+         onmouseover="this.style.background='#2563EB';this.style.color='white'"
+         onmouseout="this.style.background='#EFF6FF';this.style.color='#1D4ED8'">
+        📞 {{ lead.phone }}
+      </a>
+      <!-- WHATSAPP -->
+      <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}?text=Hello%20{{ lead.name|urlencode }}%2C%20main%20Caryanams%20se%20bol%20raha%20hoon.%20Aapki%20{{ (lead.product or 'car enquiry')|urlencode }}%20ke%20baare%20mein%20baat%20karni%20thi.%20Kya%20abhi%20time%20hai%3F"
+         target="_blank"
+         style="display:flex;align-items:center;gap:5px;padding:6px 11px;background:#F0FDF4;color:#166534;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700;border:1.5px solid #BBF7D0;transition:all .15s;white-space:nowrap"
+         onmouseover="this.style.background='#25D366';this.style.color='white'"
+         onmouseout="this.style.background='#F0FDF4';this.style.color='#166534'">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
+        WhatsApp
+      </a>
+    </td>
+    <td>
+      <div style="font-size:12px;font-weight:600">{{ lead.product or '—' }}</div>
+      {% if lead.budget %}<div style="font-size:11px;color:#059669;font-weight:700;margin-top:2px">💰 {{ lead.budget }}</div>{% endif %}
+      {% if lead.aname %}<div style="font-size:11px;color:var(--text3);margin-top:2px">👤 {{ lead.aname }}</div>{% endif %}
+    </td>
+    <td>
+      <select onchange="qSt({{ lead.id }},this)" style="border:none;padding:5px 7px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;background:{{ sc[lead.status] }}22;color:{{ sc[lead.status] }};width:135px;font-family:'DM Sans',sans-serif">
+        {% for s in statuses %}<option value="{{ s }}" {% if lead.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+    </td>
+    <td>
+      <!-- APPROVE / REJECT / HOLD inline buttons -->
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+        {% if lead.admin_status != 'Approved' %}
+        <form method="POST" action="/admin/leads/{{ lead.id }}/action">
+          <input type="hidden" name="action" value="approve">
+          <button type="submit" style="padding:4px 9px;background:#ECFDF5;color:#065F46;border:1.5px solid #059669;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">✅ Approve</button>
+        </form>
+        {% endif %}
+        {% if lead.admin_status != 'Rejected' %}
+        <form method="POST" action="/admin/leads/{{ lead.id }}/action">
+          <input type="hidden" name="action" value="reject">
+          <button type="submit" style="padding:4px 9px;background:#FEF2F2;color:#991B1B;border:1.5px solid #EF4444;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">❌ Reject</button>
+        </form>
+        {% endif %}
+        {% if lead.admin_status not in ['On Hold','Rejected'] %}
+        <form method="POST" action="/admin/leads/{{ lead.id }}/action">
+          <input type="hidden" name="action" value="hold">
+          <button type="submit" style="padding:4px 9px;background:#FFF7ED;color:#92400E;border:1.5px solid #F59E0B;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⏸ Hold</button>
+        </form>
+        {% endif %}
+      </div>
+      <div style="display:flex;gap:4px">
+        <a href="/admin/leads/{{ lead.id }}" class="btn btn-primary btn-xs">Open →</a>
+        <form method="POST" action="/admin/leads/{{ lead.id }}/delete" onsubmit="return confirm('Delete?')">
+          <button type="submit" class="btn btn-danger btn-xs">🗑</button>
+        </form>
+      </div>
+    </td>
+    <td>
+      <!-- ASSIGN TELECALLER INLINE — always visible, even after approve -->
+      <form method="POST" action="/admin/leads/{{ lead.id }}/action" style="display:flex;gap:4px;align-items:center;margin-bottom:6px">
+        <input type="hidden" name="action" value="assign">
+        <select name="agent_id" style="padding:5px 7px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;background:white;min-width:120px;font-family:'DM Sans',sans-serif">
+          <option value="">-- Select --</option>
+          {% for a in agents %}<option value="{{ a.id }}" {% if lead.assigned_to==a.id %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" style="padding:5px 10px;background:var(--primary);color:white;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif">Assign →</button>
+      </form>
+      {% if lead.aname %}
+      <div style="font-size:11px;color:#059669;font-weight:600">✅ {{ lead.aname }} ko assigned</div>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" style="text-align:center;padding:50px;color:var(--text3)">
+    <div style="font-size:32px;margin-bottom:8px">🔍</div>
+    Koi lead nahi mila. <a href="/admin/leads" style="color:var(--primary)">Filters clear karein</a>
+  </td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+</form>
+
+{% if pages > 1 %}
+<div class="pagination" style="margin-top:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+  {% if page > 1 %}
+  <a href="?page={{ page-1 }}&q={{ qs }}&st={{ st }}&ast={{ ast }}&ag={{ ag }}&src={{ src }}&ct={{ ct }}&per={{ per }}" class="pg-btn">← Prev</a>
+  {% endif %}
+  {% for i in range(1,pages+1) %}
+  <a href="?page={{ i }}&q={{ qs }}&st={{ st }}&ast={{ ast }}&ag={{ ag }}&src={{ src }}&ct={{ ct }}&per={{ per }}"
+     class="pg-btn {% if i==page %}active{% endif %}">{{ i }}</a>
+  {% endfor %}
+  {% if page < pages %}
+  <a href="?page={{ page+1 }}&q={{ qs }}&st={{ st }}&ast={{ ast }}&ag={{ ag }}&src={{ src }}&ct={{ ct }}&per={{ per }}" class="pg-btn">Next →</a>
+  {% endif %}
+  <span style="font-size:12px;color:var(--text3);margin-left:6px">Page {{ page }} of {{ pages }}</span>
+</div>
+{% endif %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+const sc={{ sc|tojson }}
+
+// Quick status update
+function qSt(lid,sel){
+  fetch(`/api/lead/${lid}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:sel.value})})
+  .then(r=>r.json()).then(d=>{if(d.ok){sel.style.background=d.color+'22';sel.style.color=d.color}})
+}
+
+// ── CHECKBOX LOGIC ──────────────────────────────────────────────────────────
+function masterToggle(cb){
+  document.querySelectorAll('.lchk').forEach(x=>x.checked=cb.checked)
+  updateUI()
+}
+function selNone(){
+  document.querySelectorAll('.lchk').forEach(x=>x.checked=false)
+  document.getElementById('chkMaster').checked=false
+  updateUI()
+}
+function updateUI(){
+  const checked = [...document.querySelectorAll('.lchk:checked')]
+  const n = checked.length
+  const total = document.querySelectorAll('.lchk').length
+
+  // Master checkbox state
+  const master = document.getElementById('chkMaster')
+  master.checked = n === total && total > 0
+  master.indeterminate = n > 0 && n < total
+
+  // Count badge
+  const badge = document.getElementById('selCount')
+  const clearBtn = document.getElementById('clearBtn')
+  if(n > 0){
+    badge.style.display='inline-block'
+    badge.textContent = n + ' selected'
+    clearBtn.style.display='inline-block'
+  } else {
+    badge.style.display='none'
+    clearBtn.style.display='none'
+  }
+
+  // Show/hide assign panel
+  const panel = document.getElementById('assignPanel')
+  const countEl = document.getElementById('assignCount')
+  if(n > 0){
+    panel.style.display='block'
+    countEl.textContent = n
+  } else {
+    panel.style.display='none'
+  }
+}
+
+// Each row checkbox
+document.addEventListener('change', function(e){
+  if(e.target.classList.contains('lchk')) updateUI()
+})
+
+// ── ASSIGN TO TELECALLER ────────────────────────────────────────────────────
+function assignToTelecaller(agentId, agentName){
+  const ids = [...document.querySelectorAll('.lchk:checked')].map(c=>c.value)
+  if(!ids.length){ alert('Koi lead select nahi!'); return }
+  if(!confirm(`${ids.length} leads "${agentName}" ko assign karna chahte ho?`)) return
+
+  // Show loading
+  document.getElementById('assignPanel').innerHTML =
+    '<div style="text-align:center;padding:16px;color:rgba(255,255,255,.6);font-size:14px">⏳ Assigning ho raha hai...</div>'
+
+  // Submit via hidden form
+  const f = document.getElementById('bulkForm')
+  document.getElementById('bulkActionInput').value = 'assign'
+  document.getElementById('bulkAgentInput').value = agentId
+  // Remove old hidden inputs
+  f.querySelectorAll('input[name="lead_ids[]"]').forEach(i=>i.remove())
+  ids.forEach(id=>{
+    const i=document.createElement('input')
+    i.type='hidden'; i.name='lead_ids[]'; i.value=id
+    f.appendChild(i)
+  })
+  f.style.display='block'
+  f.submit()
+}
+
+// ── BULK APPROVE / REJECT ───────────────────────────────────────────────────
+function bulkAction(action){
+  const ids = [...document.querySelectorAll('.lchk:checked')].map(c=>c.value)
+  if(!ids.length){ alert('Pehle leads select karo!'); return }
+  const labels = {'approve':'Approve','reject':'Reject'}
+  if(!confirm(`${ids.length} leads ko ${labels[action]} karna chahte ho?`)) return
+
+  const f = document.getElementById('bulkForm')
+  document.getElementById('bulkActionInput').value = action
+  document.getElementById('bulkAgentInput').value = ''
+  f.querySelectorAll('input[name="lead_ids[]"]').forEach(i=>i.remove())
+  ids.forEach(id=>{
+    const i=document.createElement('input')
+    i.type='hidden'; i.name='lead_ids[]'; i.value=id
+    f.appendChild(i)
+  })
+  f.style.display='block'
+  f.submit()
+}
+</script>
+{% endblock %}

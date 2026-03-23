@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — CRM{% endblock %}
+{% block page_title %}📊 Admin Dashboard{% endblock %}
+{% block notif_items %}
+  {% for n in notifs %}
+  <a href="{{ n.link or '#' }}" class="notif-item {% if not n.is_read %}unread{% endif %}" style="display:block;text-decoration:none">
+    <div class="nt">{{ n.message }}</div>
+    <div class="nt-time">{{ n.created_at[5:16] }}</div>
+  </a>
+  {% endfor %}
+{% endblock %}
+{% block content %}
+
+<!-- STAT CARDS -->
+<div class="grid4 mb4">
+  <div class="stat-card" style="border-top:3px solid #F59E0B">
+    <div class="stat-icon">⏳</div>
+    <div class="stat-num" style="color:#D97706">{{ stats.pending }}</div>
+    <div class="stat-lbl">Pending Approval</div>
+    <a href="/admin/leads?ast=Pending" style="font-size:11px;color:#D97706;text-decoration:none;font-weight:600;margin-top:8px;display:block">Review now →</a>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #2563EB">
+    <div class="stat-icon">👥</div>
+    <div class="stat-num" style="color:#2563EB">{{ stats.total }}</div>
+    <div class="stat-lbl">Total Leads</div>
+    <div class="text-muted" style="margin-top:6px">+{{ stats.today }} aaj</div>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #059669">
+    <div class="stat-icon">✅</div>
+    <div class="stat-num" style="color:#059669">{{ stats.approved }}</div>
+    <div class="stat-lbl">Approved Leads</div>
+    <div class="prog" style="margin-top:8px"><div class="prog-fill" style="width:{{ ((stats.approved/stats.total*100) if stats.total else 0)|int }}%;background:#059669"></div></div>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #7C3AED">
+    <div class="stat-icon">🏆</div>
+    <div class="stat-num" style="color:#7C3AED">{{ stats.converted }}</div>
+    <div class="stat-lbl">Converted</div>
+    <div class="text-muted" style="margin-top:6px">{{ stats.calls }} calls aaj</div>
+  </div>
+</div>
+
+<div class="grid2 mb4" style="gap:20px">
+  <!-- PENDING LEADS -->
+  <div class="card">
+    <div class="card-title">⏳ Pending Approval
+      {% if stats.pending > 0 %}
+      <span style="background:#FEF3C7;color:#D97706;padding:2px 10px;border-radius:12px;font-size:11px">{{ stats.pending }} new</span>
+      {% endif %}
+    </div>
+    {% set pending_leads = recent | selectattr('admin_status','equalto','Pending') | list %}
+    {% if pending_leads %}
+    <div style="display:flex;flex-direction:column;gap:8px">
+      {% for lead in pending_leads[:5] %}
+      <div style="border:1.5px solid #FEF3C7;border-radius:10px;padding:12px;background:#FFFBEB;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#0D1117">{{ lead.name }}</div>
+          <div class="text-muted">📞 {{ lead.phone }} · {{ lead.source }}</div>
+          {% if lead.product %}<div style="font-size:11px;color:#059669;font-weight:600;margin-top:2px">{{ lead.product }}</div>{% endif %}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+          <a href="/admin/leads/{{ lead.id }}" class="btn btn-warning btn-xs">Review →</a>
+          <div class="text-muted">{{ lead.created_at[5:16] }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% if stats.pending > 5 %}
+      <a href="/admin/leads?ast=Pending" style="text-align:center;padding:8px;background:#FEF3C7;border-radius:8px;color:#D97706;text-decoration:none;font-size:12px;font-weight:700">View all {{ stats.pending }} pending →</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:30px;color:#94A3B8">
+      <div style="font-size:32px">🎉</div>
+      <div style="margin-top:8px;font-size:13px">Koi pending lead nahi!</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- TELECALLER PERFORMANCE -->
+  <div class="card">
+    <div class="card-title flex-jb">
+      🧑‍💼 Telecaller Performance
+      <a href="/admin/telecallers" class="btn btn-ghost btn-xs">Manage →</a>
+    </div>
+    {% if callers %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for c in callers %}
+      <div style="border:1px solid var(--border2);border-radius:10px;padding:12px">
+        <div class="flex-jb mb1">
+          <div>
+            <div style="font-weight:700;font-size:13px">{{ c.name }}</div>
+            <div class="text-muted">{{ c.phone or 'No phone' }}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            {% if c.active %}
+            <span class="chip" style="background:#ECFDF5;color:#065F46">🟢 Active</span>
+            {% else %}
+            <span class="chip" style="background:#F1F5F9;color:#64748B">⚫ Inactive</span>
+            {% endif %}
+            <span class="chip" style="background:#EFF6FF;color:#1D4ED8">{{ c.today_calls }} calls today</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <span>👥 <strong>{{ c.total }}</strong> leads</span>
+          <span>🏆 <strong>{{ c.converted }}</strong> converted</span>
+          {% if c.total > 0 %}<span style="color:#059669">{{ ((c.converted/c.total)*100)|int }}% rate</span>{% endif %}
+        </div>
+        <div class="prog" style="margin-top:8px">
+          <div class="prog-fill" style="width:{{ ((c.converted/c.total*100) if c.total else 0)|int }}%;background:linear-gradient(90deg,#059669,#10B981)"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:30px;color:#94A3B8">
+      <div style="font-size:32px">👤</div>
+      <div style="margin-top:8px;font-size:13px">Koi telecaller nahi</div>
+      <a href="/admin/telecallers" class="btn btn-primary btn-sm" style="margin-top:12px">+ Add Telecaller</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TODAY FOLLOWUPS -->
+{% if followups %}
+<div class="card mb4" style="border:1.5px solid #FED7AA">
+  <div class="card-title">📅 Aaj ke Follow-ups ({{ followups|length }})</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px">
+    {% for lead in followups %}
+    <div style="border:1px solid #FED7AA;border-radius:10px;padding:12px;background:#FFF7ED">
+      <div style="font-weight:700;font-size:13px">{{ lead.name }}</div>
+      <div class="text-muted">{{ lead.phone }} · {{ lead.aname or 'Unassigned' }}</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <a href="/admin/leads/{{ lead.id }}" class="btn btn-warning btn-xs">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- LEAD STATUS BREAKDOWN -->
+<div class="card mb4">
+  <div class="card-title">📊 Lead Status Breakdown</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+    {% for s in ['New','Called','Interested','Not Interested','Follow-up','Converted','Lost','Not Answered'] %}
+    {% set cnt = s_counts.get(s,0) %}
+    <a href="/admin/leads?st={{ s }}" style="text-decoration:none;flex:1;min-width:120px;border:1.5px solid {{ sc[s] }}33;border-radius:12px;padding:14px;background:{{ sc[s] }}0D;text-align:center;transition:all .15s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div style="font-size:22px;font-weight:800;color:{{ sc[s] }};font-family:'Syne',sans-serif">{{ cnt }}</div>
+      <div style="font-size:11px;color:{{ sc[s] }};font-weight:600;margin-top:2px">{{ s }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- RECENT LEADS -->
+<div class="card">
+  <div class="card-title flex-jb">
+    🕐 Recent Leads
+    <a href="/admin/leads" class="btn btn-ghost btn-xs">View All →</a>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="table">
+    <thead><tr><th>#</th><th>Customer</th><th>Phone</th><th>Product</th><th>Source</th><th>Admin Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for lead in recent %}
+    <tr>
+      <td style="color:var(--text3);font-size:11px">{{ lead.id }}</td>
+      <td>
+        <div style="font-weight:700">{{ lead.name }}</div>
+        <div class="text-muted">{{ lead.city or '' }}</div>
+      </td>
+      <td>
+        <a href="tel:{{ lead.phone }}" class="call-btn">📞 {{ lead.phone }}</a>
+      </td>
+      <td style="font-size:12px">{{ lead.product or '—' }}</td>
+      <td><span class="chip" style="background:#F1F5F9;color:#475569">{{ lead.source }}</span></td>
+      <td>
+        <span class="status-pill" style="background:{{ sc[lead.admin_status] }}22;color:{{ sc[lead.admin_status] }}">
+          {{ lead.admin_status }}
+        </span>
+      </td>
+      <td><a href="/admin/leads/{{ lead.id }}" class="btn btn-primary btn-xs">Open →</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}
