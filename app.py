@@ -1,9 +1,18 @@
+# from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, Response, send_file
+# import sqlite3, os, csv, io, hashlib
+# from datetime import datetime, date
+# from functools import wraps
+
+# app = Flask(__name__)
+
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, Response, send_file
-import sqlite3, os, csv, io, hashlib
+import sqlite3, os, csv, io, hashlib  # <--- Yahan 'os' hona chahiye
 from datetime import datetime, date
 from functools import wraps
 
 app = Flask(__name__)
+
+
 app.secret_key = "crm_secret_2025"
 DB = os.path.join(os.path.dirname(__file__), "crm.db")
 
