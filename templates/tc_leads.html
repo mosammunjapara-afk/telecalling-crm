@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% block title %}My Leads — CRM{% endblock %}
+{% block page_title %}📋 My Leads{% endblock %}
+{% block notif_items %}
+  {% for n in notifs %}<a href="{{ n.link or '#' }}" class="notif-item {% if not n.is_read %}unread{% endif %}" style="display:block;text-decoration:none"><div class="nt">{{ n.message }}</div><div class="nt-time">{{ n.created_at[5:16] }}</div></a>{% endfor %}
+{% endblock %}
+{% block content %}
+
+<style>
+.lead-card{background:white;border-radius:14px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;transition:box-shadow .2s}
+.lead-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.call-big{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:#2563EB;color:white;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 3px 12px rgba(37,99,235,.3);transition:all .15s}
+.call-big:hover{background:#1D4ED8;transform:translateY(-1px)}
+.wa-big{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:#25D366;color:white;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 3px 12px rgba(37,211,102,.3);transition:all .15s}
+.wa-big:hover{background:#128C7E;transform:translateY(-1px)}
+.log-btn{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;background:white;color:var(--primary);border:2px solid var(--primary);border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.log-btn:hover{background:var(--primary);color:white}
+.status-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.toast-msg{position:fixed;bottom:24px;right:24px;padding:13px 22px;border-radius:12px;font-size:13px;font-weight:700;color:white;z-index:9999;transition:all .3s ease;opacity:0;transform:translateY(20px);pointer-events:none}
+.toast-msg.show{opacity:1;transform:translateY(0)}
+</style>
+
+<div id="globalToast" class="toast-msg"></div>
+
+<!-- FILTERS -->
+<form method="GET" action="/tc/leads">
+<div class="filter-bar">
+  <input name="q" placeholder="🔍 Naam, phone, city..." value="{{ qs }}" style="flex:1;min-width:150px">
+  <select name="st" onchange="this.form.submit()">
+    <option value="">All Leads</option>
+    {% for s in statuses %}<option value="{{ s }}" {% if st==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  <a href="/tc/leads" class="btn btn-ghost btn-sm">Clear</a>
+  <span class="text-muted"><strong style="color:var(--text)">{{ total }}</strong> leads</span>
+</div>
+</form>
+
+<!-- LEADS LIST -->
+{% if leads %}
+<div style="display:flex;flex-direction:column;gap:14px">
+{% for lead in leads %}
+<div class="lead-card" id="lcard-{{ lead.id }}">
+
+  <!-- TOP BAR: name + status -->
+  <div style="padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:16px;font-weight:800;font-family:'Syne',sans-serif;color:var(--text)">{{ lead.name }}</div>
+      <div class="text-muted" style="margin-top:2px;font-size:12px">
+        {% if lead.city %}📍 {{ lead.city }}{% endif %}
+        {% if lead.product %} &nbsp;·&nbsp; 🚗 {{ (lead.product[:40] + '...') if lead.product|length > 40 else lead.product }}{% endif %}
+        {% if lead.budget %} &nbsp;·&nbsp; 💰 {{ lead.budget }}{% endif %}
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <!-- CURRENT STATUS (auto-updates when telecaller logs call) -->
+      <span class="status-tag" id="stag-{{ lead.id }}"
+            style="background:{{ sc[lead.status] }}22;color:{{ sc[lead.status] }}">
+        {{ lead.status }}
+      </span>
+      {% if lead.followup_date %}
+      <span class="status-tag" style="background:#FFF7ED;color:#9A3412">
+        📅 {% if lead.followup_date==today %}TODAY{% else %}{{ lead.followup_date }}{% endif %}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- MAIN ACTION ROW: Call + WA + Log -->
+  <div style="padding:14px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <!-- CLICK TO CALL — direct dial, then auto-open log modal -->
+    <a href="tel:{{ lead.phone }}"
+       onclick="scheduleModal('logModal-{{ lead.id }}')"
+       class="call-big">
+      📞 {{ lead.phone }}
+    </a>
+
+    <!-- WHATSAPP -->
+    <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}?text=Hello%20{{ lead.name|urlencode }}%2C%20main%20Caryanams%20se%20bol%20raha%20hoon.%20Aapki%20{{ (lead.product or 'car enquiry')|urlencode }}%20ke%20baare%20mein%20baat%20karni%20thi.%20Kya%20abhi%20baat%20kar%20sakte%20hain%3F"
+       target="_blank"
+       onclick="scheduleModal('logModal-{{ lead.id }}')"
+       class="wa-big">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
+      WhatsApp
+    </a>
+
+    <!-- LOG CALL BUTTON -->
+    <button class="log-btn" onclick="document.getElementById('logModal-{{ lead.id }}').classList.add('show')">
+      📝 Log Call
+    </button>
+
+    <!-- VIEW DETAIL -->
+    <a href="/tc/leads/{{ lead.id }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;padding:9px 16px;background:var(--card2);color:var(--text2);border-radius:9px;text-decoration:none;font-size:12px;font-weight:700;border:1px solid var(--border)">
+      Full Detail →
+    </a>
+  </div>
+
+  <!-- LAST CALL INFO (if any) -->
+  {% set last_call_key = 'last_' + lead.id|string %}
+  <div id="lastcall-{{ lead.id }}" style="padding:0 18px 14px;font-size:12px;color:var(--text3)">
+    {% if lead.updated_at and lead.status != 'New' %}
+    <span style="background:var(--card2);padding:4px 10px;border-radius:8px;border:1px solid var(--border2)">
+      🕐 Last update: {{ lead.updated_at[:16] }}
+    </span>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ══ LOG CALL MODAL (one per lead) ══ -->
+<div class="modal-bg" id="logModal-{{ lead.id }}">
+  <div class="modal" style="max-width:520px">
+    <div class="flex-jb mb3">
+      <div class="modal-title">📞 Call Log — {{ lead.name }}</div>
+      <button onclick="document.getElementById('logModal-{{ lead.id }}').classList.remove('show')"
+              style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text3);line-height:1">✕</button>
+    </div>
+
+    <!-- Quick dial reminder -->
+    <div style="background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-radius:10px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-size:15px;font-weight:700;color:#1D4ED8">{{ lead.phone }}</div>
+      <div style="display:flex;gap:8px">
+        <a href="tel:{{ lead.phone }}" style="padding:7px 14px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📞 Call</a>
+        <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}" target="_blank"
+           style="padding:7px 14px;background:#25D366;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">💬 WA</a>
+      </div>
+    </div>
+
+    <!-- ★ QUICK RESPONSE — Telecaller yahan se response daale ★ -->
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">
+        Customer ka response — ek click mein select karein:
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Interested','Connected')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #059669;background:#ECFDF5;color:#065F46;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-int">
+          👍<br>Interested
+        </button>
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Not Interested','Connected')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #EF4444;background:#FEF2F2;color:#991B1B;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-ni">
+          👎<br>Not Interested
+        </button>
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Converted','Connected')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #7C3AED;background:#F5F3FF;color:#5B21B6;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-conv">
+          🏆<br>Converted
+        </button>
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Follow-up','Connected')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #F97316;background:#FFF7ED;color:#9A3412;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-fu">
+          📅<br>Follow-up
+        </button>
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Not Answered','Not Answered')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #F59E0B;background:#FFFBEB;color:#92400E;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-na">
+          📵<br>Not Answered
+        </button>
+
+        <button type="button" onclick="pickResp({{ lead.id }},'Called','Connected')"
+          style="padding:12px 8px;border-radius:10px;border:2px solid #8B5CF6;background:#F5F3FF;color:#5B21B6;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s"
+          id="rb-{{ lead.id }}-called">
+          📞<br>Called
+        </button>
+
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form method="POST" action="/tc/leads/{{ lead.id }}/call" id="logForm-{{ lead.id }}">
+      <div class="grid2">
+        <div class="form-group">
+          <label>Call Status *</label>
+          <select name="call_status" class="form-control" id="cs-{{ lead.id }}" required>
+            {% for cs in call_statuses %}<option>{{ cs }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lead Status</label>
+          <select name="lead_status" class="form-control" id="ls-{{ lead.id }}">
+            {% for s in statuses %}<option value="{{ s }}" {% if lead.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Call Duration</label>
+          <input name="duration" class="form-control" placeholder="e.g. 3 min 20 sec">
+        </div>
+        <div class="form-group">
+          <label>Follow-up Date</label>
+          <input type="date" name="followup_date" class="form-control" id="fu-{{ lead.id }}" value="{{ lead.followup_date or '' }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Remarks / Notes</label>
+        <textarea name="remarks" class="form-control" rows="3"
+          placeholder="Kya baat hui? Customer interested hai? Budget kya hai? Kab lena hai?..."></textarea>
+      </div>
+      <div style="background:#F0FDF4;border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#065F46;font-weight:600">
+        ✅ Save karne ke baad Reports mein automatically update ho jaayega
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('logModal-{{ lead.id }}').classList.remove('show')"
+                class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="padding:11px 28px;font-size:14px">
+          💾 Save & Update Report
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endfor %}
+</div>
+
+{% else %}
+<div class="card" style="text-align:center;padding:60px">
+  <div style="font-size:48px;margin-bottom:12px">📭</div>
+  <div style="font-size:16px;font-weight:700;margin-bottom:6px">Koi lead assign nahi hai</div>
+  <div class="text-muted">Admin se leads assign karwao</div>
+</div>
+{% endif %}
+
+{% if pages > 1 %}
+<div class="pagination" style="margin-top:16px">
+  {% for i in range(1,pages+1) %}
+  <a href="?page={{ i }}&q={{ qs }}&st={{ st }}" class="pg-btn {% if i==page %}active{% endif %}">{{ i }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+const sc = {{ sc|tojson }}
+let modalTimer = null
+
+// Auto-open log modal after call/WA click
+function scheduleModal(modalId){
+  if(modalTimer) clearTimeout(modalTimer)
+  modalTimer = setTimeout(()=>{
+    document.getElementById(modalId)?.classList.add('show')
+  }, 2500)
+}
+
+// Pick quick response — sets dropdowns + highlights button
+function pickResp(lid, leadStatus, callStatus){
+  // Set call status dropdown
+  const cs = document.getElementById(`cs-${lid}`)
+  if(cs) for(let i=0;i<cs.options.length;i++) if(cs.options[i].value===callStatus){cs.selectedIndex=i;break}
+
+  // Set lead status dropdown
+  const ls = document.getElementById(`ls-${lid}`)
+  if(ls) for(let i=0;i<ls.options.length;i++) if(ls.options[i].value===leadStatus){ls.selectedIndex=i;break}
+
+  // Highlight selected, dim others
+  const btnIds = [`rb-${lid}-int`,`rb-${lid}-ni`,`rb-${lid}-conv`,`rb-${lid}-fu`,`rb-${lid}-na`,`rb-${lid}-called`]
+  const colorMap = {'Interested':'#059669','Not Interested':'#EF4444','Converted':'#7C3AED','Follow-up':'#F97316','Not Answered':'#F59E0B','Called':'#8B5CF6'}
+  const keyMap = {'Interested':`rb-${lid}-int`,'Not Interested':`rb-${lid}-ni`,'Converted':`rb-${lid}-conv`,'Follow-up':`rb-${lid}-fu`,'Not Answered':`rb-${lid}-na`,'Called':`rb-${lid}-called`}
+
+  btnIds.forEach(id => {
+    const b = document.getElementById(id)
+    if(b){ b.style.opacity='0.45'; b.style.transform='scale(0.95)' }
+  })
+  const activeId = keyMap[leadStatus]
+  if(activeId){
+    const ab = document.getElementById(activeId)
+    if(ab){
+      ab.style.opacity='1'; ab.style.transform='scale(1.05)'
+      ab.style.background = colorMap[leadStatus]||'#888'
+      ab.style.color = 'white'
+      ab.style.borderColor = colorMap[leadStatus]||'#888'
+    }
+  }
+
+  // Auto focus followup date if Follow-up
+  if(leadStatus==='Follow-up'){
+    setTimeout(()=>document.getElementById(`fu-${lid}`)?.focus(), 100)
+  }
+}
+
+// Toast notification
+function showToast(msg, color='#059669'){
+  const t = document.getElementById('globalToast')
+  t.textContent = msg
+  t.style.background = color
+  t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'), 3000)
+}
+</script>
+{% endblock %}

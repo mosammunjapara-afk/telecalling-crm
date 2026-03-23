@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caryanams — Car Enquiry</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;background:#060A12}
+
+nav{background:rgba(6,10,18,.98);border-bottom:1px solid rgba(255,255,255,.08);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#3B6EF8,#7C5CE8);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+.logo-tag{font-size:10px;color:#4A5878;display:block;margin-top:-2px}
+.nav-r{display:flex;align-items:center;gap:12px}
+.nav-r a{color:#8B9BBE;text-decoration:none;font-size:13px;font-weight:500;transition:color .2s;display:flex;align-items:center;gap:5px}
+.nav-r a:hover{color:#fff}
+
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.card{background:#0C1220;border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden}
+
+.card-head{background:linear-gradient(135deg,#0C1838,#161040);padding:26px 30px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.head-icon{width:46px;height:46px;background:linear-gradient(135deg,#3B6EF8,#7C5CE8);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 14px rgba(59,110,248,.4)}
+.head-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff}
+.head-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
+
+.card-body{padding:28px 30px}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:700;color:#8B9BBE;margin-bottom:7px;text-transform:uppercase;letter-spacing:.04em}
+.req{color:#FF4D6D}
+.fg input,.fg select{
+  width:100%;padding:12px 14px;
+  background:#101828;border:1.5px solid rgba(255,255,255,.08);
+  border-radius:10px;font-size:14px;color:#F0F4FF;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .2s;outline:none
+}
+.fg input::placeholder{color:rgba(255,255,255,.2)}
+.fg input:focus,.fg select:focus{
+  border-color:#3B6EF8;background:rgba(59,110,248,.06);
+  box-shadow:0 0 0 3px rgba(59,110,248,.1)
+}
+.fg select{cursor:pointer;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A5878' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px
+}
+.fg select option{background:#101828;color:#F0F4FF}
+
+.submit-btn{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,#3B6EF8,#2952E3);color:white;
+  border:none;border-radius:10px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(59,110,248,.35);
+  margin-top:4px
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,110,248,.5)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.trust{display:flex;border:1px solid rgba(255,255,255,.06);border-radius:10px;overflow:hidden;margin-top:14px}
+.ti{flex:1;padding:9px 6px;text-align:center;border-right:1px solid rgba(255,255,255,.06);font-size:10px;color:#4A5878;font-weight:600;line-height:1.5}
+.ti:last-child{border:none}
+.ti span{font-size:14px;display:block;margin-bottom:2px}
+
+footer{background:rgba(6,10,18,.8);border-top:1px solid rgba(255,255,255,.06);padding:14px 24px;text-align:center;font-size:12px;color:#4A5878}
+footer a{color:#4A5878;text-decoration:none}
+footer a:hover{color:#8B9BBE}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(6,10,18,.92);z-index:999;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(16px)}
+.overlay.open{display:flex}
+.sbox{background:#0C1220;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:48px 36px;max-width:420px;width:100%;text-align:center}
+.sico{width:78px;height:78px;background:rgba(0,212,170,.1);border:2px solid rgba(0,212,170,.25);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:34px;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.sbox h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:10px}
+.sbox p{font-size:14px;color:#8B9BBE;line-height:1.75;margin-bottom:6px}
+.close-btn{display:inline-flex;align-items:center;gap:6px;margin-top:22px;padding:12px 26px;background:#3B6EF8;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.close-btn:hover{background:#2952E3}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon">🚗</div>
+    <div>
+      <div class="logo-name">Caryanams</div>
+      <span class="logo-tag">Ahmedabad's #1 Car Marketplace</span>
+    </div>
+  </a>
+  <div class="nav-r">
+    <a href="tel:+919000000001">📞 +91 90000 00001</a>
+    <a href="https://wa.me/919000000001" target="_blank">💬 WhatsApp</a>
+  </div>
+</nav>
+
+<main>
+  <div class="card">
+    <div class="card-head">
+      <div class="head-icon">🚗</div>
+      <div>
+        <div class="head-title">Car Enquiry Form</div>
+        <div class="head-sub">Expert will call back within 24 hours · Free service</div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <form onsubmit="doSubmit(event)">
+
+        <div class="fg">
+          <label>Full Name <span class="req">*</span></label>
+          <input name="name" id="fname" placeholder="Enter your full name"
+                 required autocomplete="name" autofocus>
+        </div>
+
+        <div class="fg">
+          <label>Phone Number <span class="req">*</span></label>
+          <input name="phone" id="fphone" placeholder="10-digit mobile number"
+                 inputmode="numeric" maxlength="12" required
+                 oninput="this.value=this.value.replace(/\D/g,'')"
+                 autocomplete="tel">
+        </div>
+
+        <div class="fg">
+          <label>Email Address</label>
+          <input name="email" type="email" placeholder="your@email.com"
+                 autocomplete="email">
+        </div>
+
+        <div class="fg">
+          <label>City</label>
+          <input name="city" placeholder="e.g. Ahmedabad, Surat, Mumbai"
+                 autocomplete="address-level2"
+                 oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())">
+        </div>
+
+        <!-- <div class="fg">
+          <label>I'm Interested In</label>
+          <select name="product">
+            <option value="">— Select (Optional) —</option>
+            <option>Buy a New Car</option>
+            <option>Buy a Used Car</option>
+            <option>Sell My Car</option>
+            <option>Car Loan / Finance</option>
+            <option>Car Insurance</option>
+            <option>RC Transfer / Papers</option>
+            <option>Car Inspection</option>
+          </select>
+        </div> -->
+
+        <div class="fg">
+          <label>Source</label>
+          <select name="source">
+            <option value="Website" selected>Website</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Google">Google</option>
+            <option value="YouTube">YouTube</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Referral">Referral</option>
+            <option value="Walk-in">Walk-in</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <input type="hidden" name="whatsapp" id="fwhatsapp">
+        <input type="hidden" name="budget" value="">
+        <input type="hidden" name="notes" value="">
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          ✅ Submit Enquiry
+        </button>
+
+        <div class="trust">
+          <div class="ti"><span>🔒</span>Data Safe</div>
+          <div class="ti"><span>⚡</span>24hr Callback</div>
+          <div class="ti"><span>✅</span>Free Service</div>
+          <div class="ti"><span>💬</span>WhatsApp</div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2025 Caryanams · Ahmedabad ·
+  <a href="tel:+919000000001">📞 +91 90000 00001</a> ·
+  <a href="/login">Admin Login</a>
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="sbox">
+    <div class="sico">✅</div>
+    <h2 id="sname">Thank You!</h2>
+    <p id="smsg">Your enquiry has been submitted successfully!</p>
+    <p style="font-size:13px;color:#4A5878;margin-top:8px">
+      Our expert will call you within <strong style="color:#60A5FA">24 hours</strong>.<br>
+      You'll also receive a WhatsApp update.
+    </p>
+    <button class="close-btn" onclick="document.getElementById('overlay').classList.remove('open')">
+      ✓ Got It, Thanks!
+    </button>
+  </div>
+</div>
+
+<script>
+async function doSubmit(e){
+  e.preventDefault()
+  const btn = document.getElementById('submitBtn')
+  const name = document.getElementById('fname').value.trim()
+  const phone = document.getElementById('fphone').value.trim()
+
+  if(!name){ alert('Please enter your full name!'); return }
+  if(phone.length < 10){ alert('Please enter a valid 10-digit phone number!'); return }
+
+  document.getElementById('fwhatsapp').value = phone
+  btn.disabled = true
+  btn.innerHTML = '⏳ Submitting...'
+
+  try{
+    const fd = new FormData(e.target)
+    await fetch('/form', { method:'POST', body: fd })
+  } catch(err){}
+
+  const firstName = name.split(' ')[0]
+  document.getElementById('sname').textContent = `Thank You, ${firstName}! 🎉`
+  document.getElementById('smsg').textContent = `Your enquiry is received. Our expert will call you on ${phone} shortly.`
+  document.getElementById('overlay').classList.add('open')
+
+  e.target.reset()
+  btn.disabled = false
+  btn.innerHTML = '✅ Submit Enquiry'
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Import Leads — CRM{% endblock %}
+{% block page_title %}📥 Import Leads from Excel{% endblock %}
+{% block content %}
+
+<style>
+.import-wrap{max-width:640px;margin:0 auto}
+.upload-zone{border:2px dashed var(--border2);border-radius:16px;padding:48px 32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--card2);position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--primary);background:var(--primaryL,#EFF6FF)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:48px;margin-bottom:14px}
+.upload-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+.upload-sub{font-size:13px;color:var(--text3)}
+.file-chosen{display:none;margin-top:12px;padding:10px 16px;background:var(--primaryL,#EFF6FF);border-radius:8px;font-size:13px;font-weight:600;color:var(--primary)}
+.sample-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+.sample-table th{background:#1A1A2E;color:white;padding:8px 12px;text-align:left;font-weight:600}
+.sample-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.sample-table tr:nth-child(even) td{background:var(--card2)}
+.tip{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;margin-bottom:10px}
+.tip-info{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.tip-warn{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}
+.tip-success{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+</style>
+
+<div class="import-wrap">
+
+  <!-- STEP 1: FORMAT GUIDE -->
+  <div class="card mb3">
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px">📋 Step 1 — Excel Format</div>
+
+    <div class="tip tip-info">
+      <span>ℹ️</span>
+      <div>The first <strong> row of the Excel file </strong>must contain headers. Please use the format shown below.</strong></div>
+    </div>
+
+    <div class="tip tip-success">
+      <span>✅</span>
+      <div><strong> Required columns:</strong> Name, Phone — all other columns are optional.</div>
+    </div>
+
+    <div class="tip tip-warn">
+      <span>⚠️</span>
+      <div>Duplicate phone numbers will be skipped. No existing data will be overwritten.</div>
+    </div>
+
+    <!-- SAMPLE TABLE -->
+    <div style="overflow-x:auto;margin-top:16px">
+    <table class="sample-table">
+      <thead>
+        <tr><th>Name</th><th>Phone</th><th>Email</th><th>City</th><th>Source</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Rahul Patel</td><td>9876543210</td><td>rahul@email.com</td><td>Ahmedabad</td><td>Facebook</td><td>SUV interest</td></tr>
+        <tr><td>Priya Shah</td><td>8765432109</td><td></td><td>Surat</td><td>Instagram</td><td></td></tr>
+        <tr><td>Amit Desai</td><td>7654321098</td><td>amit@gmail.com</td><td>Vadodara</td><td>WhatsApp</td><td>Budget 10L</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- DOWNLOAD SAMPLE -->
+    <div style="margin-top:14px;text-align:right">
+      <a href="/admin/leads/sample-excel" class="btn btn-ghost btn-sm">📥 Sample Excel Download</a>
+    </div>
+  </div>
+
+  <!-- STEP 2: UPLOAD -->
+  <div class="card mb3">
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px">📤 Step 2 — Upload File</div>
+    <form method="POST" enctype="multipart/form-data" action="/admin/leads/import" id="importForm">
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" name="excel_file" id="fileInput" accept=".xlsx,.xls,.csv"
+               onchange="fileChosen(this)" required>
+        <div class="upload-icon">📊</div>
+        <div class="upload-title">Drop Excel file here or click to upload</div>
+        <div class="upload-sub">.xlsx, .xls, .csv — max 10MB</div>
+        <div class="file-chosen" id="fileChosen">✅ File selected</div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="form-group">
+          <label>Assign to Telecaller (Optional)</label>
+          <select name="import_agent" class="form-control">
+            <option value="">-- Do not assign --</option>
+            {% for a in agents %}
+            <option value="{{ a.id }}">{{ a.name }} {% if a.phone %}({{ a.phone }}){% endif %}</option>
+            {% endfor %}
+          </select>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">(If selected, leads will be directly assigned to this telecaller after import)</div>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" name="auto_approve" value="1" checked
+                   style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary)">
+            <span> Auto-Approve (Skip 'Pending' status, set to 'Approved' directly)</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <a href="/admin/leads" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary" id="importBtn" style="flex:1">
+          📥 Import Now
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- WHAT HAPPENS -->
+  <div class="card">
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">⚡ What happens after Import?</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><span style="color:#10B981;font-weight:700">✅</span> All leads will immediately appear in the "All Leads" section.</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><span style="color:#10B981;font-weight:700">✅</span> If a telecaller was selected, they will receive a notification.</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><span style="color:#10B981;font-weight:700">✅</span> Duplicate phone numbers will be automatically filtered/skipped.</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)"><span style="color:#F59E0B;font-weight:700">⚠️</span> No existing data will be overwritten.</div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function fileChosen(input){
+  const zone = document.getElementById('uploadZone')
+  const label = document.getElementById('fileChosen')
+  if(input.files[0]){
+    label.style.display='block'
+    label.textContent = '✅ '+input.files[0].name+' ('+Math.round(input.files[0].size/1024)+'KB)'
+    zone.style.borderColor='var(--primary)'
+    zone.style.background='var(--primaryL,#EFF6FF)'
+  }
+}
+
+// Drag and drop
+const zone = document.getElementById('uploadZone')
+zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag') })
+zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'))
+zone.addEventListener('drop', e=>{
+  e.preventDefault(); zone.classList.remove('drag')
+  const fi = document.getElementById('fileInput')
+  fi.files = e.dataTransfer.files
+  fileChosen(fi)
+})
+
+// Submit button loading
+document.getElementById('importForm').onsubmit = function(){
+  const btn = document.getElementById('importBtn')
+  btn.textContent = '⏳ Import ho raha hai...'
+  btn.disabled = true
+}
+</script>
+{% endblock %}
