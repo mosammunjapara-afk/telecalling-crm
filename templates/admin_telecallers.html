@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Telecallers — CRM{% endblock %}
+{% block page_title %}🧑‍💼 Telecaller Management{% endblock %}
+{% block content %}
+
+<div class="flex-jb mb3">
+  <div style="color:var(--text3);font-size:13px">Add, edit, or delete telecallers dynamically</div>
+  <button onclick="document.getElementById('addModal').classList.add('show')" class="btn btn-primary">+ Add New Telecaller</button>
+</div>
+
+<!-- TELECALLER CARDS -->
+{% if telecallers %}
+<div class="grid3 mb4" style="gap:16px">
+  {% for tc in telecallers %}
+  <div class="card" style="border-top:3px solid {% if tc.active %}#059669{% else %}#9CA3AF{% endif %}">
+    <div class="flex-jb mb3">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#059669,#10B981);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;flex-shrink:0">
+          {{ tc.name[0]|upper }}
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:14px">{{ tc.name }}</div>
+          <div class="text-muted">@{{ tc.username }}</div>
+        </div>
+      </div>
+      <span class="chip" style="background:{% if tc.active %}#ECFDF5{% else %}#F1F5F9{% endif %};color:{% if tc.active %}#065F46{% else %}#64748B{% endif %}">
+        {% if tc.active %}🟢 Active{% else %}⚫ Inactive{% endif %}
+      </span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      {% macro info(label, val) %}
+      <div style="background:var(--card2);padding:8px 10px;border-radius:8px">
+        <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">{{ label }}</div>
+        <div style="font-size:13px;font-weight:700;margin-top:2px">{{ val or '—' }}</div>
+      </div>
+      {% endmacro %}
+      {{ info('Phone', tc.phone) }}
+      {{ info('Leads', tc.total) }}
+      {{ info('Converted', tc.converted) }}
+      {{ info('Total Calls', tc.calls) }}
+    </div>
+
+    {% if tc.total > 0 %}
+    <div class="prog mb3">
+      <div class="prog-fill" style="width:{{ ((tc.converted/tc.total)*100)|int }}%;background:linear-gradient(90deg,#059669,#10B981)"></div>
+    </div>
+    <div class="text-muted mb3" style="text-align:center">Conversion: {{ ((tc.converted/tc.total)*100)|int }}%</div>
+    {% endif %}
+
+    <!-- Contact buttons -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      {% if tc.phone %}
+      <a href="tel:{{ tc.phone }}" class="call-btn" style="flex:1;justify-content:center">📞 Call</a>
+      <a href="https://wa.me/91{{ tc.phone }}" target="_blank" class="wa-btn" style="flex:1;justify-content:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
+        WhatsApp
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:6px;border-top:1px solid var(--border2);padding-top:12px">
+      <button onclick="openEdit({{ tc.id }},'{{ tc.name }}','{{ tc.phone or '' }}','{{ tc.email or '' }}')" class="btn btn-ghost btn-xs" style="flex:1">✏️ Edit</button>
+      <form method="POST" style="flex:1">
+        <input type="hidden" name="action" value="toggle">
+        <input type="hidden" name="uid" value="{{ tc.id }}">
+        <button type="submit" class="btn btn-xs {% if tc.active %}btn-warning{% else %}btn-success{% endif %}" style="width:100%">
+          {% if tc.active %}⏸ Deactivate{% else %}▶️ Activate{% endif %}
+        </button>
+      </form>
+      <form method="POST" onsubmit="return confirm('Delete {{ tc.name }}? Unke leads unassign ho jayenge.')" style="flex:1">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="uid" value="{{ tc.id }}">
+        <button type="submit" class="btn btn-danger btn-xs" style="width:100%">🗑 Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:60px">
+  <div style="font-size:48px;margin-bottom:16px">👤</div>
+  <div style="font-size:18px;font-weight:700;margin-bottom:8px">>No Telecallers Found</div>
+  <div class="text-muted mb3">Add your first telecaller to start assigning leads.</div>
+  <button onclick="document.getElementById('addModal').classList.add('show')" class="btn btn-primary">+ Add First Telecaller</button>
+</div>
+{% endif %}
+
+<!-- ADD MODAL -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="flex-jb mb3">
+      <div class="modal-title">➕ Add New Telecaller</div>
+      <button onclick="document.getElementById('addModal').classList.remove('show')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <form method="POST">
+      <input type="hidden" name="action" value="add">
+      <div class="grid2">
+        <div class="form-group">
+          <label>Enter name*</label>
+          <input name="name" class="form-control" placeholder="Enter name" required>
+        </div>
+        <div class="form-group">
+          <label>Username *</label>
+          <input name="username" class="form-control" placeholder="Login username" required>
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" name="password" class="form-control" placeholder="Strong password" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input name="phone" class="form-control" placeholder="10-digit mobile" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email (optional)</label>
+        <input name="email" type="email" class="form-control" placeholder="email@example.com">
+      </div>
+      <div style="background:#EFF6FF;border-radius:10px;padding:12px;margin-bottom:16px;font-size:12px;color:#1D4ED8">
+        ℹ️ Share these credentials with the telecaller — they can login via login.html and will only see their assigned leads.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('addModal').classList.remove('show')" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">✅ Add Telecaller</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="flex-jb mb3">
+      <div class="modal-title">✏️ Edit Telecaller</div>
+      <button onclick="document.getElementById('editModal').classList.remove('show')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <form method="POST">
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="uid" id="editUid">
+      <div class="grid2">
+        <div class="form-group">
+          <label>Pura Naam *</label>
+          <input name="name" id="editName" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input name="phone" id="editPhone" class="form-control" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input name="email" id="editEmail" type="email" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>New Password (khaali chhodo agar change nahi karna)</label>
+        <input type="password" name="password" class="form-control" placeholder="Naya password (optional)">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('editModal').classList.remove('show')" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function openEdit(id, name, phone, email) {
+  document.getElementById('editUid').value = id
+  document.getElementById('editName').value = name
+  document.getElementById('editPhone').value = phone
+  document.getElementById('editEmail').value = email
+  document.getElementById('editModal').classList.add('show')
+}
+</script>
+{% endblock %}

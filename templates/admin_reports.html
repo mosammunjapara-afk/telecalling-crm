@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}Reports — CRM{% endblock %}
+{% block page_title %}📈 Reports{% endblock %}
+{% block notif_items %}
+  {% for n in notifs %}<a href="{{ n.link or '#' }}" class="notif-item {% if not n.is_read %}unread{% endif %}" style="display:block;text-decoration:none"><div class="nt">{{ n.message }}</div><div class="nt-time">{{ n.created_at[5:16] }}</div></a>{% endfor %}
+{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    {% for p,lbl in [('today','Aaj'),('week','Last 7 Days'),('month','Last 30 Days')] %}
+    <a href="/admin/reports?period={{ p }}" class="btn {% if period==p %}btn-primary{% else %}btn-ghost{% endif %}">{{ lbl }}</a>
+    {% endfor %}
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:12px;color:var(--text3)">🔄 Auto-refresh: <span id="refreshTimer" style="font-weight:700;color:var(--primary)">30</span>s</div>
+    <button onclick="location.reload()" class="btn btn-ghost btn-xs">↻ Now</button>
+    <a href="/admin/export/excel" class="btn btn-success btn-sm">📊 Excel</a>
+    <a href="/admin/export/csv" class="btn btn-ghost btn-sm">📥 CSV</a>
+  </div>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="grid4 mb4">
+  <div class="stat-card" style="border-top:3px solid #3B82F6">
+    <div class="stat-num" style="color:#3B82F6">{{ summary.total }}</div>
+    <div class="stat-lbl">Total Leads</div>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #10B981">
+    <div class="stat-num" style="color:#10B981">{{ summary.interested }}</div>
+    <div class="stat-lbl">Interested</div>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #7C3AED">
+    <div class="stat-num" style="color:#7C3AED">{{ summary.converted }}</div>
+    <div class="stat-lbl">Converted</div>
+  </div>
+  <div class="stat-card" style="border-top:3px solid #F97316">
+    <div class="stat-num" style="color:#F97316">{{ summary.total_calls }}</div>
+    <div class="stat-lbl">Total Calls</div>
+  </div>
+</div>
+
+<div class="grid2 mb4" style="gap:20px">
+  <div class="card">
+    <div class="card-title">🌐 Lead Sources</div>
+    {% for r in src_stats %}
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:600">{{ r.source }}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--primary)">{{ r.cnt }}</span>
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;border-radius:3px;width:{{ ((r.cnt/src_stats[0].cnt)*100)|int if src_stats else 0 }}%;background:linear-gradient(90deg,#2563EB,#7C3AED)"></div>
+      </div>
+    </div>
+    {% else %}<div class="text-muted">Koi data nahi</div>{% endfor %}
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Lead Status</div>
+    {% for r in status_stats %}
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600">
+          <span style="width:10px;height:10px;border-radius:50%;background:{{ sc.get(r.status,'#888') }};display:inline-block"></span>{{ r.status }}
+        </span>
+        <span style="font-size:13px;font-weight:700;color:{{ sc.get(r.status,'#888') }}">{{ r.cnt }}</span>
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;background:{{ sc.get(r.status,'#888') }};border-radius:3px;width:{{ ((r.cnt/status_stats[0].cnt)*100)|int if status_stats else 0 }}%"></div>
+      </div>
+    </div>
+    {% else %}<div class="text-muted">NO Data</div>{% endfor %}
+  </div>
+</div>
+
+<!-- TELECALLER PERFORMANCE TABLE -->
+<div class="card mb4">
+  <div class="card-title flex-jb">
+    🧑‍💼 Telecaller Performance
+    <span style="font-size:11px;color:var(--text3);font-weight:500">Call log karne pe automatically update hota hai</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Telecaller</th>
+        <th>Phone</th>
+        <th style="background:#DBEAFE;color:#1E40AF;text-align:center">Total Leads</th>
+        <th style="background:#DCFCE7;color:#065F46;text-align:center">👍 Interested</th>
+        <th style="background:#FEE2E2;color:#991B1B;text-align:center">👎 Not Interested</th>
+        <th style="background:#FFEDD5;color:#9A3412;text-align:center">📅 Follow-up</th>
+        <th style="background:#EDE9FE;color:#5B21B6;text-align:center">🏆 Converted</th>
+        <th style="background:#FEF9C3;color:#78350F;text-align:center">📵 Not Answered</th>
+        <th style="background:#F0FDF4;color:#065F46;text-align:center">📞 Total Calls</th>
+        <th style="background:#EDE9FE;color:#5B21B6;text-align:center">Conv. %</th>
+        <th>Contact</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in agent_rep %}
+    <tr>
+      <td style="font-weight:700">{{ r.name }}</td>
+      <td class="text-muted" style="font-size:12px">{{ r.phone or '—' }}</td>
+      <td style="text-align:center;font-weight:700">{{ r.total or 0 }}</td>
+      <td style="text-align:center;background:#ECFDF5">
+        <span style="font-weight:800;color:#065F46;font-size:16px">{{ r.interested or 0 }}</span>
+      </td>
+      <td style="text-align:center;background:#FEF2F2">
+        <span style="font-weight:700;color:#991B1B">{{ r.not_int or 0 }}</span>
+      </td>
+      <td style="text-align:center;color:#F97316;font-weight:700">{{ r.followup_c or 0 }}</td>
+      <td style="text-align:center;background:#F5F3FF">
+        <span style="font-weight:800;color:#5B21B6;font-size:16px">{{ r.converted or 0 }}</span>
+      </td>
+      <td style="text-align:center;color:#F59E0B;font-weight:700">{{ r.not_ans or 0 }}</td>
+      <td style="text-align:center;font-weight:800;color:#059669;font-size:16px">{{ r.calls or 0 }}</td>
+      <td style="text-align:center">
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+          <div style="height:6px;width:50px;background:var(--border);border-radius:3px;overflow:hidden">
+            <div style="height:100%;background:#10B981;border-radius:3px;width:{{ ((r.interested/(r.total or 1))*100)|int }}%"></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;color:#059669">{{ ((r.interested/(r.total or 1))*100)|int }}%</span>
+        </div>
+      </td>
+      <td>
+        {% if r.phone %}
+        <div style="display:flex;gap:5px">
+          <a href="tel:{{ r.phone }}" style="padding:5px 10px;background:#EFF6FF;color:#1D4ED8;border-radius:7px;text-decoration:none;font-size:11px;font-weight:700;border:1px solid #BFDBFE"
+             onmouseover="this.style.background='#2563EB';this.style.color='white'"
+             onmouseout="this.style.background='#EFF6FF';this.style.color='#1D4ED8'">📞</a>
+          <a href="https://wa.me/91{{ r.phone|replace(' ','') }}" target="_blank"
+             style="padding:5px 10px;background:#F0FDF4;color:#166534;border-radius:7px;text-decoration:none;font-size:11px;font-weight:700;border:1px solid #BBF7D0"
+             onmouseover="this.style.background='#25D366';this.style.color='white'"
+             onmouseout="this.style.background='#F0FDF4';this.style.color='#166534'">💬</a>
+        </div>
+        {% else %}<span class="text-muted">—</span>{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="11" style="text-align:center;color:var(--text3);padding:24px">Koi telecaller nahi</td></tr>
+    {% endfor %}
+    </tbody>
+    {% if agent_rep %}
+    <tfoot>
+      <tr style="background:#F8FAFF;border-top:2px solid var(--border)">
+        <td colspan="2" style="font-weight:800;font-size:13px;padding:12px 14px">📊 TOTAL</td>
+        <td style="text-align:center;font-weight:800">{{ agent_rep|sum(attribute='total') }}</td>
+        <td style="text-align:center;background:#ECFDF5;font-size:16px;font-weight:800;color:#065F46">{{ agent_rep|sum(attribute='interested') }}</td>
+        <td style="text-align:center;background:#FEF2F2;font-weight:700;color:#991B1B">{{ agent_rep|sum(attribute='not_int') }}</td>
+        <td style="text-align:center;color:#F59E0B;font-weight:700">{{ agent_rep|sum(attribute='not_ans') }}</td>
+        <td style="text-align:center;font-weight:800;color:#059669;font-size:16px">{{ agent_rep|sum(attribute='calls') }}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+  </div>
+</div>
+
+<!-- RECENT LEADS WITH OPEN BUTTON -->
+<div class="card mb4">
+  <div class="card-title flex-jb">
+    📋 Recent Leads — Live Status
+    <a href="/admin/leads" class="btn btn-ghost btn-xs">All Leads →</a>
+  </div>
+  <div style="overflow-x:auto">
+  <table class="table">
+    <thead>
+      <tr><th>#</th><th>Customer</th><th>Contact</th><th>Lead Status</th><th>Assigned To</th><th>Calls</th><th>Open</th></tr>
+    </thead>
+    <tbody>
+    {% for lead in recent_leads %}
+    <tr>
+      <td style="color:var(--text3);font-size:11px">{{ lead.id }}</td>
+      <td>
+        <div style="font-weight:700">{{ lead.name }}</div>
+        <div class="text-muted">{{ lead.city or '' }}</div>
+      </td>
+      <td>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <a href="tel:{{ lead.phone }}" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:#EFF6FF;color:#1D4ED8;border-radius:7px;text-decoration:none;font-size:11px;font-weight:700;border:1px solid #BFDBFE;white-space:nowrap"
+             onmouseover="this.style.background='#2563EB';this.style.color='white'"
+             onmouseout="this.style.background='#EFF6FF';this.style.color='#1D4ED8'">📞 {{ lead.phone }}</a>
+          <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}" target="_blank"
+             style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:#F0FDF4;color:#166534;border-radius:7px;text-decoration:none;font-size:11px;font-weight:700;border:1px solid #BBF7D0;white-space:nowrap"
+             onmouseover="this.style.background='#25D366';this.style.color='white'"
+             onmouseout="this.style.background='#F0FDF4';this.style.color='#166534'">💬 WhatsApp</a>
+        </div>
+      </td>
+      <td><span style="padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:{{ sc[lead.status] }}22;color:{{ sc[lead.status] }}">{{ lead.status }}</span></td>
+      <td style="font-size:12px">{{ lead['aname'] if lead['aname'] else '—' }}</td>
+      <td style="text-align:center;font-size:16px;font-weight:800;color:{% if lead.call_count > 0 %}#7C3AED{% else %}var(--text3){% endif %}">{{ lead.call_count }}</td>
+      <td><a href="/admin/leads/{{ lead.id }}" class="btn btn-primary btn-xs">Open →</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">No Any Lead</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- DAILY COUNT -->
+<div class="card">
+  <div class="card-title">📅 Daily Lead Count</div>
+  {% if daily %}
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    {% for d in daily %}
+    <div style="text-align:center;padding:12px 16px;background:#EFF6FF;border-radius:10px;border:1px solid #BFDBFE;min-width:75px">
+      <div style="font-size:22px;font-weight:800;color:#2563EB;font-family:'Syne',sans-serif">{{ d.cnt }}</div>
+      <div style="font-size:10px;color:#64748b;font-weight:600;margin-top:2px">{{ d.day[5:] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}<div class="text-muted">No Any Data</div>{% endif %}
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+let secs = 30
+const timer = document.getElementById('refreshTimer')
+setInterval(()=>{
+  secs--
+  if(timer) timer.textContent = secs
+  if(secs <= 0) location.reload()
+}, 1000)
+</script>
+{% endblock %}

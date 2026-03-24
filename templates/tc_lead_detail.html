@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.name }} — My Lead{% endblock %}
+{% block page_title %}📋 Lead Detail{% endblock %}
+{% block notif_items %}
+  {% for n in notifs %}<a href="{{ n.link or '#' }}" class="notif-item {% if not n.is_read %}unread{% endif %}" style="display:block;text-decoration:none"><div class="nt">{{ n.message }}</div><div class="nt-time">{{ n.created_at[5:16] }}</div></a>{% endfor %}
+{% endblock %}
+{% block content %}
+<style>
+.qbtn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:9px;border:2px solid;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;background:white}
+.qbtn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.qbtn.active{color:white!important}
+.info-box{background:var(--card2);padding:10px 13px;border-radius:9px;border:1px solid var(--border2)}
+.info-box .lbl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.info-box .val{font-size:13px;font-weight:700;color:var(--text);margin-top:3px}
+.stat-pill{display:inline-flex;flex-direction:column;align-items:center;padding:12px 20px;border-radius:12px;border:2px solid;min-width:90px;text-align:center}
+.stat-pill .n{font-size:26px;font-weight:800;font-family:'Syne',sans-serif;line-height:1}
+.stat-pill .l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:4px;opacity:.7}
+</style>
+
+<!-- HEADER -->
+<div class="flex-jb mb3">
+  <a href="/tc/leads" class="btn btn-ghost btn-sm">← Back to My Leads</a>
+  <span id="mainBadge" style="padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;background:{{ sc[lead.status] }}22;color:{{ sc[lead.status] }}">{{ lead.status }}</span>
+</div>
+
+<!-- LIVE STATS -->
+<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+  <div class="stat-pill" style="border-color:#8B5CF6;background:#F5F3FF">
+    <div class="n" style="color:#7C3AED" id="stat-calls">{{ logs|length }}</div>
+    <div class="l" style="color:#7C3AED">Total Calls</div>
+  </div>
+  <div class="stat-pill" style="border-color:#10B981;background:#ECFDF5">
+    <div class="n" style="color:#059669">{{ '✅' if lead.status=='Interested' or lead.status=='Converted' else logs|selectattr('remarks','defined')|list|length }}</div>
+    <div class="l" style="color:#059669">Interested</div>
+  </div>
+  <div class="stat-pill" style="border-color:#7C3AED;background:#F5F3FF">
+    <div class="n" style="color:#7C3AED">{{ '🏆' if lead.status=='Converted' else '—' }}</div>
+    <div class="l" style="color:#7C3AED">Converted</div>
+  </div>
+  <div class="stat-pill" style="border-color:#F97316;background:#FFF7ED">
+    <div class="n" style="color:#F97316;font-size:14px">{{ lead.followup_date or '—' }}</div>
+    <div class="l" style="color:#F97316">Follow-up</div>
+  </div>
+</div>
+
+<div class="grid2" style="gap:20px;align-items:start">
+
+<!-- LEFT -->
+<div>
+
+  <!-- CUSTOMER CARD -->
+  <div class="card mb3">
+    <div style="display:flex;align-items:center;gap:14px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border2)">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:white;flex-shrink:0">{{ lead.name[0]|upper }}</div>
+      <div>
+        <div style="font-size:19px;font-weight:800;font-family:'Syne',sans-serif">{{ lead.name }}</div>
+        {% if lead.email %}<div class="text-muted">✉️ {{ lead.email }}</div>{% endif %}
+        <div class="text-muted">Lead #{{ lead.id }} · {{ lead.created_at[:10] }}</div>
+      </div>
+    </div>
+
+    <!-- 🔥 CONTACT BUTTONS -->
+    {% if lead.admin_status == 'Rejected' %}
+    <div style="background:linear-gradient(135deg,#FEF2F2,#FFF1F2);border-radius:12px;padding:20px;margin-bottom:16px;border:2px solid #FECACA;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">🚫</div>
+      <div style="font-size:15px;font-weight:800;color:#DC2626;margin-bottom:5px">Lead Rejected</div>
+      <div style="font-size:12px;color:#6B7280">Admin ne is lead ko reject kar diya hai.<br>Call ya WhatsApp karna allowed nahi hai.</div>
+    </div>
+    {% else %}
+    <div style="background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid #BFDBFE">
+      <div style="font-size:10px;font-weight:700;color:#1D4ED8;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em">📞 Customer ko Contact Karein</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <!-- CLICK TO CALL — direct dial + auto open log modal -->
+        <a href="tel:{{ lead.phone }}"
+           onclick="setTimeout(openLogModal, 2500)"
+           style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#2563EB;color:white;border-radius:11px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 16px rgba(37,99,235,.35);transition:all .15s"
+           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          📞 {{ lead.phone }}
+        </a>
+        <!-- WHATSAPP -->
+        <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}?text=Hello%20{{ lead.name|urlencode }}%2C%20main%20Caryanams%20se%20bol%20raha%20hoon.%20Aapki%20{{ (lead.product or 'car enquiry')|urlencode }}%20ke%20baare%20mein%20baat%20karni%20thi.%20Kya%20abhi%20baat%20kar%20sakte%20hain%3F"
+           target="_blank"
+           onclick="setTimeout(openLogModal, 3000)"
+           style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#25D366;color:white;border-radius:11px;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 16px rgba(37,211,102,.35);transition:all .15s"
+           onmouseover="this.style.background='#128C7E';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#25D366';this.style.transform='translateY(0)'">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
+          WhatsApp
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- INFO GRID -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      {% macro inf(l,v,c='') %}<div class="info-box"><div class="lbl">{{ l }}</div><div class="val" style="color:{{ c or 'var(--text)' }}">{{ v or '—' }}</div></div>{% endmacro %}
+      {{ inf('City', lead.city) }}
+      {{ inf('Source', lead.source) }}
+      {{ inf('Product', lead.product) }}
+      {{ inf('Budget', lead.budget, '#059669') }}
+      {{ inf('WhatsApp', lead.whatsapp) }}
+      {{ inf('Follow-up Date', lead.followup_date, '#F97316') }}
+    </div>
+    {% if lead.address %}
+    <div class="info-box" style="margin-top:10px">
+      <div class="lbl">📍 Address</div>
+      <div class="val">{{ lead.address }}</div>
+    </div>
+    {% endif %}
+    {% if lead.notes %}
+    <div style="margin-top:10px;padding:12px;background:#FFFBEB;border-radius:9px;border-left:3px solid #F59E0B">
+      <div style="font-size:10px;color:#92400E;font-weight:700;margin-bottom:4px">📝 NOTES</div>
+      <div style="font-size:13px;color:#374151">{{ lead.notes }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- QUICK STATUS — Telecaller can update -->
+  {% if lead.admin_status != 'Rejected' %}
+  <div class="card mb3">
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px">⚡ Quick Status Update</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      {% for s in statuses %}
+      <button onclick="quickSt({{ lead.id }},'{{ s }}',this)" data-s="{{ s }}"
+        style="padding:6px 13px;border-radius:20px;border:2px solid {{ sc[s] }};background:{% if lead.status==s %}{{ sc[s] }}{% else %}transparent{% endif %};color:{% if lead.status==s %}white{% else %}{{ sc[s] }}{% endif %};font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif">
+        {{ s }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- LOG CALL CTA -->
+  {% if lead.admin_status != 'Rejected' %}
+  <div style="background:linear-gradient(135deg,#1D4ED8,#7C3AED);border-radius:var(--radius);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <div>
+      <div style="color:white;font-weight:700;font-size:15px;font-family:'Syne',sans-serif">📞 Call Log Karein</div>
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:3px">Call karo → outcome record karo → report mein automatically aayega</div>
+    </div>
+    <button onclick="openLogModal()" style="background:white;color:#1D4ED8;border:none;padding:11px 22px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">
+      + Log Call
+    </button>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- RIGHT -->
+<div>
+
+  <!-- CALL HISTORY -->
+  <div class="card mb3">
+    <div class="flex-jb mb3">
+      <div style="font-size:14px;font-weight:700">📞 Call History
+        <span style="background:#E0E7FF;color:#3730A3;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:5px" id="callCountBadge">{{ logs|length }}</span>
+      </div>
+      {% if lead.admin_status != "Rejected" %}<button onclick="openLogModal()" class="btn btn-primary btn-xs">+ Log Call</button>{% endif %}
+    </div>
+
+    <div id="callHistoryList">
+    {% if logs %}
+      {% for log in logs %}
+      <div style="border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:9px">
+        <div class="flex-jb mb1">
+          <span style="padding:3px 11px;border-radius:12px;font-size:11px;font-weight:700;background:#EFF6FF;color:#1D4ED8">{{ log.call_status }}</span>
+          <span class="text-muted">{{ log.called_at[:16] }}</span>
+        </div>
+        {% if log.duration %}<div style="font-size:12px;color:var(--text2)">⏱ Duration: <strong>{{ log.duration }}</strong></div>{% endif %}
+        {% if log.remarks %}
+        <div style="margin-top:7px;background:var(--card2);padding:9px 11px;border-radius:7px;font-size:12px;color:var(--text3);line-height:1.5">{{ log.remarks }}</div>
+        {% endif %}
+        {% if log.followup_date %}
+        <div style="margin-top:6px;font-size:11px;color:#F97316;font-weight:700">📅 Follow-up: {{ log.followup_date }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="text-align:center;padding:36px;color:var(--text3)" id="emptyCallLog">
+        <div style="font-size:36px;margin-bottom:10px">📵</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">Abhi tak koi call nahi hua</div>
+        <div style="font-size:12px;margin-bottom:16px">Upar se call karo phir log karein</div>
+        {% if lead.admin_status != "Rejected" %}<button onclick="openLogModal()" class="btn btn-primary">📞 Log First Call</button>{% endif %}
+      </div>
+    {% endif %}
+    </div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  {# <div class="card">
+    <div class="flex-jb mb2">
+      <div style="font-size:13px;font-weight:700">📁 Documents
+        <span style="background:#E0E7FF;color:#3730A3;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:5px">{{ docs|length }}</span>
+      </div>
+      <button onclick="document.getElementById('docModal').classList.add('show')" class="btn btn-primary btn-xs">+ Add</button>
+    </div>
+    {% set received = docs|map(attribute='doc_type')|list %}
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+      {% for dt in doc_types %}
+      <span style="padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;background:{% if dt in received %}#DCFCE7{% else %}#FEF2F2{% endif %};color:{% if dt in received %}#166534{% else %}#991B1B{% endif %}">
+        {% if dt in received %}✓{% else %}✗{% endif %} {{ dt }}
+      </span>
+      {% endfor %}
+    </div>
+    {% if docs %}
+    {% for doc in docs %}
+    <div style="border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700;font-size:13px">📄 {{ doc.doc_type }}</div>
+        <div class="text-muted">{{ doc.uploaded_at[:10] }}</div>
+      </div>
+      {% set dc={'Pending':'#F59E0B','Received':'#3B82F6','Verified':'#059669','Rejected':'#EF4444'} %}
+      <span style="background:{{ dc.get(doc.doc_status,'#888') }}22;color:{{ dc.get(doc.doc_status,'#888') }};padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">{{ doc.doc_status }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+</div>
+</div> #}
+
+<!-- ══ LOG CALL MODAL ══ -->
+<div class="modal-bg" id="logModal">
+  <div class="modal" style="max-width:540px">
+    <div class="flex-jb mb3">
+      <div class="modal-title">📞 Call Log — {{ lead.name }}</div>
+      <button onclick="document.getElementById('logModal').classList.remove('show')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+
+    <!-- Quick dial reminder -->
+    <div style="background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-size:15px;font-weight:700;color:#1D4ED8">{{ lead.phone }}</div>
+      <div style="display:flex;gap:8px">
+        {% if lead.admin_status != 'Rejected' %}
+        <a href="tel:{{ lead.phone }}" style="padding:7px 14px;background:#2563EB;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">📞 Call</a>
+        <a href="https://wa.me/91{{ lead.phone|replace(' ','')|replace('-','') }}" target="_blank" style="padding:7px 14px;background:#25D366;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">💬 WhatsApp</a>
+        {% else %}
+        <span style="padding:7px 14px;background:#FEE2E2;color:#DC2626;border-radius:8px;font-size:13px;font-weight:700">🚫 Rejected</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick response buttons -->
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:9px;text-transform:uppercase;letter-spacing:.05em">Customer ka response (ek click mein set karein):</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button type="button" class="qbtn" style="border-color:#059669;color:#065F46" id="rb-int" onclick="setResp('Interested','Connected')">👍 Interested</button>
+        <button type="button" class="qbtn" style="border-color:#EF4444;color:#991B1B" id="rb-ni" onclick="setResp('Not Interested','Connected')">👎 Not Interested</button>
+        <button type="button" class="qbtn" style="border-color:#7C3AED;color:#5B21B6" id="rb-conv" onclick="setResp('Converted','Connected')">🏆 Converted</button>
+        <button type="button" class="qbtn" style="border-color:#F97316;color:#9A3412" id="rb-fu" onclick="setResp('Follow-up','Connected')">📅 Follow-up</button>
+        <button type="button" class="qbtn" style="border-color:#F59E0B;color:#92400E" id="rb-na" onclick="setResp('Not Answered','Not Answered')">📵 Not Answered</button>
+        <button type="button" class="qbtn" style="border-color:#8B5CF6;color:#5B21B6" id="rb-called" onclick="setResp('Called','Connected')">📞 Called</button>
+      </div>
+    </div>
+
+    <form method="POST" action="/tc/leads/{{ lead.id }}/call" id="logForm">
+      <div class="grid2">
+        <div class="form-group">
+          <label>Call Status *</label>
+          <select name="call_status" class="form-control" id="cs-sel" required>
+            {% for cs in call_statuses %}<option>{{ cs }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Lead Status Update</label>
+          <select name="lead_status" class="form-control" id="ls-sel">
+            {% for s in statuses %}<option value="{{ s }}" {% if lead.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Call Duration</label>
+          <input name="duration" class="form-control" id="dur-i" placeholder="e.g. 3 min 20 sec">
+        </div>
+        <div class="form-group">
+          <label>Follow-up Date</label>
+          <input type="date" name="followup_date" class="form-control" id="fu-i" value="{{ lead.followup_date or '' }}" min="{{ now.strftime('%Y-%m-%d') }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Remarks / Notes</label>
+        <textarea name="remarks" class="form-control" rows="3" id="rem-i" placeholder="Kya baat hui? Customer interested hai? Budget kya hai? Kab lena hai?..."></textarea>
+      </div>
+      <div style="background:#EFF6FF;border-radius:9px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:#1D4ED8;font-weight:500">
+        ℹ️ Yeh call log save hone ke baad <strong>Reports</strong> mein automatically count update ho jaayega
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('logModal').classList.remove('show')" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="padding:11px 28px;font-size:14px">💾 Save & Update Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DOC MODAL -->
+<div class="modal-bg" id="docModal">
+  <div class="modal" style="max-width:420px">
+    <div class="flex-jb mb3">
+      <div class="modal-title">📁 Add Document</div>
+      <button onclick="document.getElementById('docModal').classList.remove('show')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <form method="POST" action="/leads/{{ lead.id }}/docs/add">
+      <div class="form-group"><label>Document Type *</label>
+        <select name="doc_type" class="form-control" required>{% for dt in doc_types %}<option>{{ dt }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group"><label>Reference / Number</label>
+        <input name="doc_name" class="form-control" placeholder="e.g. Aadhar No. 1234 5678 9012">
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select name="doc_status" class="form-control">{% for ds in doc_statuses %}<option>{{ ds }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group"><label>Notes</label>
+        <textarea name="notes" class="form-control" rows="2"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" onclick="document.getElementById('docModal').classList.remove('show')" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">💾 Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const sc = {{ sc|tojson }}
+
+function openLogModal(){ if('{{ lead.admin_status }}' === 'Rejected') return; document.getElementById('logModal').classList.add('show') }
+
+function setResp(leadSt, callSt){
+  // Set dropdowns
+  const cs=document.getElementById('cs-sel'), ls=document.getElementById('ls-sel')
+  for(let i=0;i<cs.options.length;i++) if(cs.options[i].value===callSt){cs.selectedIndex=i;break}
+  for(let i=0;i<ls.options.length;i++) if(ls.options[i].value===leadSt){ls.selectedIndex=i;break}
+  // Highlight active button
+  ['rb-int','rb-ni','rb-conv','rb-fu','rb-na','rb-called'].forEach(id=>{
+    const b=document.getElementById(id); if(b){b.classList.remove('active');b.style.opacity='0.55'}
+  })
+  const map={'Interested':'rb-int','Not Interested':'rb-ni','Converted':'rb-conv','Follow-up':'rb-fu','Not Answered':'rb-na','Called':'rb-called'}
+  const aid=map[leadSt]; if(aid){const b=document.getElementById(aid);if(b){b.classList.add('active');b.style.opacity='1';b.style.background=sc[leadSt]||'#888'}}
+  // Auto-focus followup date
+  if(leadSt==='Follow-up') setTimeout(()=>document.getElementById('fu-i').focus(),100)
+  // Update remarks placeholder
+  const hints={'Interested':'Customer interested hai. Budget: ... | Next step: ...','Not Interested':'Customer interested nahi tha. Reason: ...','Converted':'Deal ho gaya! Amount: ... | Delivery: ...','Follow-up':'Follow-up karana hai. Reason: ...','Not Answered':'Call nahi utha. Next try: ...','Called':'Baat hui. Summary: ...'}
+  const rem=document.getElementById('rem-i'); if(rem&&!rem.value) rem.placeholder=hints[leadSt]||rem.placeholder
+}
+
+// Validate follow-up date on form submit
+document.getElementById('logForm').addEventListener('submit', function(e){
+  const fuInput = document.getElementById('fu-i');
+  if(fuInput && fuInput.value){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const selected = new Date(fuInput.value);
+    if(selected < today){
+      e.preventDefault();
+      fuInput.style.border = '2px solid #EF4444';
+      fuInput.setCustomValidity('Aaj ya aage ki date select karein');
+      fuInput.reportValidity();
+      return false;
+    }
+  }
+  fuInput && (fuInput.style.border = '');
+});
+
+async function quickSt(lid, status, btn){
+  const r=await fetch(`/api/lead/${lid}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})})
+  const d=await r.json()
+  if(d.ok){
+    document.querySelectorAll('[data-s]').forEach(b=>{
+      b.style.background=b.dataset.s===status?sc[status]:'transparent'
+      b.style.color=b.dataset.s===status?'white':sc[b.dataset.s]
+    })
+    document.getElementById('mainBadge').textContent=status
+    document.getElementById('mainBadge').style.background=d.color+'22'
+    document.getElementById('mainBadge').style.color=d.color
+    toast('✅ '+status+' saved — Report update ho gaya!', d.color)
+  }
+}
+
+function toast(msg, color='#059669'){
+  let t=document.getElementById('_t')
+  if(!t){t=document.createElement('div');t.id='_t';t.style.cssText='position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:700;color:white;z-index:9999;transition:all .3s;opacity:0;transform:translateY(20px)';document.body.appendChild(t)}
+  t.textContent=msg;t.style.background=color;t.style.opacity='1';t.style.transform='translateY(0)'
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)'},2800)
+}
+</script>
+{% endblock %}
