@@ -177,7 +177,7 @@
 <div>
 
   <!-- DOCUMENTS -->
-  <div class="card mb3">
+  <!-- <div class="card mb3">
     <div class="flex-jb mb2">
       <div style="font-size:13px;font-weight:700">📁 Documents <span style="background:#E0E7FF;color:#3730A3;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:4px">{{ docs|length }}</span></div>
       <button onclick="document.getElementById('docModal').classList.add('show')" class="btn btn-primary btn-xs">+ Add</button>
@@ -199,12 +199,12 @@
               {% for ds in doc_statuses %}<option value="{{ ds }}" {% if doc.doc_status==ds %}selected{% endif %}>{{ ds }}</option>{% endfor %}
             </select>
             <button type="submit" class="btn btn-primary btn-xs">✓</button>
-          </form>
+          </form> 
           {% endif %}
         </div>
       </div>
       {% endfor %}
-    </div>
+    </div>-->
     {% endif %}
     <div style="background:var(--card2);border-radius:8px;padding:11px;border:1px solid var(--border2)">
       <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:7px;text-transform:uppercase">Document Checklist</div>
